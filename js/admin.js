@@ -68,6 +68,7 @@ function card(r){
   }
   const ac = document.createElement('div'); ac.className = 'contact';
   if(r.submitted && acc.media) ac.appendChild(link(t('showDocs'), 'docs.html#t' + r.serial));
+  if(acc.media) ac.appendChild(link(t('fileTitle'), 'file.html?s=' + r.serial));
   if(acc.contacts) ac.appendChild(link(t('showDaily'), 'teachers.html#t' + r.serial));
   if(r.phone){
     ac.appendChild(btn(t('viewStudents'), async () => {

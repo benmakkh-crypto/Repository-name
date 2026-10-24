@@ -54,6 +54,7 @@ function card(r){
     const w = document.createElement('a'); w.textContent = t('wa'); w.href = 'https://wa.me/' + r.wa; w.target = '_blank'; w.rel = 'noopener';
     c.append(a, w);
     if(T.acc.media && r.reported){ const k = document.createElement('a'); k.textContent = t('showDocs'); k.href = 'docs.html#t' + r.serial; c.appendChild(k); }
+    if(T.acc.media) c.appendChild(link(t('fileTitle'), 'file.html?s=' + r.serial));
     body.appendChild(c);
   }
 
@@ -83,3 +84,5 @@ $('#fAll').onclick = () => setFilter('all'); $('#fToday').onclick = () => setFil
   T.phone = g.phone; T.acc = g.acc;
   await loadTeachers('');
 })();
+
+function link(text, href){ const a = document.createElement('a'); a.textContent = text; a.href = href; return a; }

@@ -25,8 +25,12 @@ const CONFIG = {
   //  contacts = يرى أرقام المعلمين وأزرار الاتصال/واتساب
   //  media    = يرى الصور والفيديوهات
   //  export   = يستخرج ملفات Excel و PDF
-  ACCOUNTS: [
-    { phone: '55551111', role: 'general',    name: 'المشرف العام',      stats: true,  contacts: true,  media: true,  export: true },
+  USERS_SHEET: 'المستخدمون',      // تُنشأ تلقائياً وتُدار من صفحة الإدارة (المشرف العام)
+  PROGRAMS_SHEET: 'البرامج والأنشطة',
+  ABOUT_SHEET: 'عن الحلقات',
+  PERSONAL_FOLDER: 'ملفات المعلمين',
+  SEED_ACCOUNTS: [
+    { phone: '55551111', role: 'general',    name: 'المشرف العام',      stats: true,  contacts: true,  media: true,  export: true, manage: true },
     { phone: '55667788', role: 'supervisor', name: 'المشرف المتابع',    stats: true,  contacts: true,  media: true,  export: false },
     { phone: '55552222', role: 'viewer',     name: 'حساب الاطلاع',      stats: false, contacts: false, media: true,  export: false }  // ← غيّر هذا الرقم
   ]
@@ -157,19 +161,72 @@ function findReport_(sh, serial, month) {
 }
 
 /* ================= واجهات الصفحة ================= */
+const USER_HEADERS = ['الرمز (الجوال)', 'الاسم', 'الدور', 'إحصائيات', 'أرقام المعلمين', 'الصور والفيديو', 'تصدير', 'إدارة', 'مفعّل', 'مفتاح الرابط', 'أضيف'];
+const ROLE_PRESETS = {
+  general:    { stats: true,  contacts: true,  media: true,  export: true,  manage: true },
+  supervisor: { stats: true,  contacts: true,  media: true,  export: false, manage: false },
+  viewer:     { stats: false, contacts: false, media: true,  export: false, manage: false },
+  donor:      { stats: true,  contacts: false, media: true,  export: false, manage: false }
+};
+const yn_ = v => (v === true || v === 'نعم') ? 'نعم' : '';
+const newKey_ = () => Utilities.getUuid().replace(/-/g, '').slice(0, 22);
+
+function usersSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(CONFIG.USERS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(CONFIG.USERS_SHEET);
+    sh.getRange('A:A').setNumberFormat('@');
+    sh.appendRow(USER_HEADERS);
+    sh.setFrozenRows(1); sh.setRightToLeft(true);
+    sh.getRange(1, 1, 1, USER_HEADERS.length).setFontWeight('bold').setBackground('#123c34').setFontColor('#ffffff');
+    CONFIG.SEED_ACCOUNTS.forEach(a => {
+      sh.appendRow([a.phone, a.name, a.role, yn_(a.stats), yn_(a.contacts), yn_(a.media), yn_(a.export), yn_(a.manage), 'نعم', newKey_(), Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd')]);
+    });
+  }
+  return sh;
+}
+
+function readUsers_() {
+  const v = usersSheet_().getDataRange().getValues();
+  const out = [];
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i];
+    if (!clean_(r[0])) continue;
+    out.push({ sheetRow: i + 1, phone: clean_(r[0]), name: clean_(r[1]), role: clean_(r[2]) || 'viewer',
+      stats: r[3] === 'نعم', contacts: r[4] === 'نعم', media: r[5] === 'نعم', export: r[6] === 'نعم', manage: r[7] === 'نعم',
+      active: r[8] === 'نعم', key: clean_(r[9]), added: String(r[10] || '') });
+  }
+  return out;
+}
+
 function account_(phone) {
   const n = normPhone_(phone);
-  return CONFIG.ACCOUNTS.find(a => normPhone_(a.phone) === n) || null;
+  if (!n) return null;
+  return readUsers_().find(a => a.active && normPhone_(a.phone) === n) || null;
+}
+
+function adminOut_(acc) {
+  return { role: acc.role, name: acc.name, stats: acc.stats, contacts: acc.contacts, media: acc.media, export: !!acc.export, manage: !!acc.manage };
 }
 
 function login(phone) {
   const n = normPhone_(phone);
   const acc = account_(phone);
-  if (acc) return { ok: true, admin: { role: acc.role, name: acc.name, stats: acc.stats, contacts: acc.contacts, media: acc.media, export: !!acc.export } };
+  if (acc) return { ok: true, admin: adminOut_(acc) };
   if (n.length < 9) return { ok: false, msg: 'E_PHONE' };
   const m = teachersInfo_().list.filter(x => x.phoneN === n);
   if (!m.length) return { ok: false, msg: 'E_NOTFOUND' };
   return { ok: true, teachers: m.map(pub_) };
+}
+
+/** الدخول برابط خاص (مثل رابط الجهة الداعمة) */
+function loginKey(key) {
+  key = clean_(key);
+  if (key.length < 12) throw new Error('E_AUTH');
+  const acc = readUsers_().find(a => a.active && a.key === key);
+  if (!acc) throw new Error('E_AUTH');
+  return { ok: true, phone: acc.phone, admin: adminOut_(acc) };
 }
 
 function bootstrap(row, phone) {
@@ -340,7 +397,7 @@ function adminData(phone, month) {
 
   const done = list.filter(t => byKey[String(t.serial)]).length;
   return {
-    account: { role: acc.role, name: acc.name, stats: acc.stats, contacts: acc.contacts, export: !!acc.export },
+    account: adminOut_(acc),
     month: month,
     years: { from: CONFIG.START_YEAR, to: yTo },
     stats: acc.stats ? { total: list.length, submitted: done, missing: list.length - done } : null,
@@ -716,13 +773,281 @@ function docsData(phone, month) {
   return { account: { role: acc.role, name: acc.name }, month: mp.month, years: mp.years, rows: rows, totals: { reports: rows.length, photos: photos, videos: videos } };
 }
 
+/* ================= الإدارة: المستخدمون والمعلمون (المشرف العام فقط) ================= */
+function manageAcc_(phone) {
+  const a = account_(phone);
+  if (!a || !a.manage) throw new Error('E_AUTH');
+  return a;
+}
+
+function usersList(phone) {
+  manageAcc_(phone);
+  return readUsers_().map(u => ({ phone: u.phone, name: u.name, role: u.role, stats: u.stats, contacts: u.contacts, media: u.media, export: u.export, manage: u.manage, active: u.active, key: u.key, added: u.added }));
+}
+
+function userSave(phone, d) {
+  manageAcc_(phone);
+  const code = clean_(d.phone), name = clean_(d.name), role = ROLE_PRESETS[d.role] ? d.role : 'viewer';
+  if (normPhone_(code).length < 5) throw new Error('E_PHONE');
+  if (name.length < 2) throw new Error('E_NAME');
+  const pr = ROLE_PRESETS[role];
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    if (teachersInfo_().list.some(t => t.phoneN === normPhone_(code))) throw new Error('E_DUP');
+    const sh = usersSheet_();
+    const all = readUsers_();
+    const old = d.orig ? all.find(u => normPhone_(u.phone) === normPhone_(d.orig)) : null;
+    if (all.some(u => (!old || u.sheetRow !== old.sheetRow) && normPhone_(u.phone) === normPhone_(code))) throw new Error('E_DUP');
+    const active = d.active === false ? '' : 'نعم';
+    if (old) {
+      if (normPhone_(old.phone) === normPhone_(phone) && (!active || role !== 'general')) throw new Error('E_SELF');
+      sh.getRange(old.sheetRow, 1, 1, 9).setNumberFormat('@').setValues([[code, name, role, yn_(pr.stats), yn_(pr.contacts), yn_(pr.media), yn_(pr.export), yn_(pr.manage), active]]);
+      if (d.renewKey) sh.getRange(old.sheetRow, 10).setValue(newKey_());
+    } else {
+      sh.appendRow([code, name, role, yn_(pr.stats), yn_(pr.contacts), yn_(pr.media), yn_(pr.export), yn_(pr.manage), active, newKey_(), Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd')]);
+      sh.getRange(sh.getLastRow(), 1).setNumberFormat('@').setValue(code);
+    }
+  } finally { lock.releaseLock(); }
+  return usersList(phone);
+}
+
+function teacherAdd(phone, d) {
+  manageAcc_(phone);
+  const name = clean_(d.name), tel = clean_(d.phone), email = clean_(d.email);
+  if (name.length < 3) throw new Error('E_NAME');
+  const pn = normPhone_(tel);
+  if (pn.length < 9) throw new Error('E_PHONE');
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('E_EMAIL');
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const info = teachersInfo_();
+    if (info.list.some(t => t.phoneN === pn)) throw new Error('E_DUP');
+    if (readUsers_().some(u => normPhone_(u.phone) === pn)) throw new Error('E_DUP');
+    const serial = info.list.reduce((m, t) => Math.max(m, Number(t.serial) || 0), 0) + 1;
+    const c = info.col, sh = info.sh;
+    const width = Math.max(sh.getLastColumn(), c.email + 1);
+    const row = new Array(width).fill('');
+    const put = (k, v) => { if (c[k] !== undefined) row[c[k]] = v; };
+    put('serial', serial); put('name', name); put('phone', tel); put('email', email);
+    put('region', clean_(d.region)); put('jiha', clean_(d.jiha)); put('halaqa', clean_(d.halaqa)); put('students', clean_(d.students));
+    const r = sh.getLastRow() + 1;
+    sh.getRange(r, 1, 1, width).setNumberFormat('@').setValues([row]);
+    SpreadsheetApp.flush();
+  } finally { lock.releaseLock(); }
+  return { ok: true, count: teachersInfo_().list.length };
+}
+
+/* ================= ملف خاص لكل معلم (Drive + صفحة) ================= */
+function personalFolder_(t, reps) {
+  const rit = DriveApp.getFoldersByName(CONFIG.ROOT_FOLDER_NAME);
+  const root = rit.hasNext() ? rit.next() : DriveApp.createFolder(CONFIG.ROOT_FOLDER_NAME);
+  const f = sub_(sub_(root, CONFIG.PERSONAL_FOLDER), t.serial + ' - ' + t.name.replace(/[\/\\]/g, ' '));
+  try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  try {
+    const have = {};
+    const it = f.getFiles(); while (it.hasNext()) have[it.next().getName()] = true;
+    reps.forEach(r => {
+      const id = idOf_(r.folder);
+      if (id && !have[r.month]) { try { f.createShortcut(id).setName(r.month); } catch (e) {} }
+    });
+  } catch (e) {}
+  return f.getUrl();
+}
+
+function fileData_(t) {
+  const v = reportsSheet_().getDataRange().getValues();
+  const reps = [];
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i];
+    if (String(r[3]) !== String(t.serial)) continue;
+    reps.push({ month: String(r[1]), date: String(r[2]), dateH: String(r[20] || ''), notes: String(r[17] || ''), folder: String(r[18] || ''),
+      photos: [9, 10, 11, 12, 13].map(k => idOf_(r[k])).filter(Boolean), videos: [14, 15, 16].map(k => idOf_(r[k])).filter(Boolean) });
+  }
+  reps.sort((a, b) => a.month < b.month ? 1 : -1);
+  let link = '';
+  try { link = personalFolder_(t, reps); } catch (e) {}
+  return { teacher: { serial: t.serial, name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region }, folderUrl: link,
+    reports: reps.map(r => ({ month: r.month, date: r.date, dateH: r.dateH, notes: r.notes, photos: r.photos, videos: r.videos })),
+    totals: { reports: reps.length, photos: reps.reduce((n, r) => n + r.photos.length, 0), videos: reps.reduce((n, r) => n + r.videos.length, 0) } };
+}
+
+function myFile(row, phone) { return fileData_(auth_(row, phone).t); }
+
+function teacherFileAdmin(phone, serial) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const t = teachersInfo_().list.find(x => String(x.serial) === String(serial));
+  if (!t) throw new Error('E_NOTFOUND');
+  return fileData_(t);
+}
+
+/** رسالة نصية إلى بريد كل معلم برابط ملفه في Drive (المشرف العام فقط) */
+function emailLinks(phone, serials, siteUrl) {
+  manageAcc_(phone);
+  const want = Array.isArray(serials) ? serials.map(String) : [];
+  const list = teachersInfo_().list.filter(t => !want.length || want.indexOf(String(t.serial)) > -1);
+  const site = /^https:\/\//.test(String(siteUrl || '')) ? String(siteUrl) : '';
+  const out = { sent: 0, noEmail: [], failed: [] };
+  list.forEach(t => {
+    if (!t.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) { out.noEmail.push(t.name); return; }
+    try {
+      const link = fileData_(t).folderUrl;
+      const body = 'السلام عليكم ورحمة الله وبركاته\n\nالأخ الفاضل ' + t.name + '،\nهذا رابط ملف حلقتكم (' + t.halaqa + ') في Drive، وفيه صور ومقاطع تقاريركم الشهرية:\n' + link +
+        (site ? '\n\nلرفع التقرير الشهري والإنجاز اليومي: ' + site : '') +
+        '\n\nجزاكم الله خيراً\nحلقات الشيخ عبد الرحمن البلاع — شركة الأمة للخدمات الإنسانية\n\n----\n' +
+        'Dear ' + t.name + ', this is the Drive folder link of your circle (photos and videos of your monthly reports): ' + link + '\n\n----\n' +
+        'প্রিয় ' + t.name + ', আপনার হালাকার মাসিক প্রতিবেদনের ছবি ও ভিডিওর ড্রাইভ লিংক: ' + link;
+      MailApp.sendEmail({ to: t.email, subject: 'ملف حلقتكم في Drive | Your circle folder | আপনার হালাকার ফোল্ডার', body: body, name: 'حلقات الشيخ عبد الرحمن البلاع' });
+      out.sent++;
+    } catch (e) { out.failed.push(t.name); }
+  });
+  return out;
+}
+
+/** تشغيل مرة واحدة من المحرر لمنح صلاحية إرسال البريد */
+function authorize() { return MailApp.getRemainingDailyQuota(); }
+
+/* ================= البرامج والأنشطة والجوائز ================= */
+const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل'];
+
+function programsSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(CONFIG.PROGRAMS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(CONFIG.PROGRAMS_SHEET);
+    sh.getRange('E:F').setNumberFormat('@'); sh.getRange('L:M').setNumberFormat('@');
+    sh.appendRow(PROGRAM_HEADERS);
+    sh.setFrozenRows(1); sh.setRightToLeft(true);
+    sh.getRange(1, 1, 1, PROGRAM_HEADERS.length).setFontWeight('bold').setBackground('#123c34').setFontColor('#ffffff');
+  }
+  return sh;
+}
+
+function readPrograms_() {
+  const v = programsSheet_().getDataRange().getValues();
+  const out = [];
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i];
+    if (!r[0]) continue;
+    out.push({ sheetRow: i + 1, id: String(r[0]), type: String(r[1]), title: clean_(r[2]), desc: String(r[3] || ''), date: String(r[4] || ''),
+      serial: String(r[5]), teacher: String(r[6] || ''), halaqa: String(r[7] || ''), prize: String(r[8] || ''), winners: String(r[9] || ''), status: String(r[10] || 'planned'), added: String(r[11] || '') });
+  }
+  return out;
+}
+
+const pubProgram_ = p => ({ id: p.id, type: p.type, title: p.title, desc: p.desc, date: p.date, serial: p.serial, teacher: p.teacher, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status });
+
+function saveProgram_(d, serial, tname, halaqa, canEditAll) {
+  const title = clean_(d.title);
+  if (title.length < 3) throw new Error('E_PTITLE');
+  const type = d.type === 'activity' ? 'activity' : 'program';
+  const status = ['planned', 'running', 'done'].indexOf(d.status) > -1 ? d.status : 'planned';
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(d.date || '')) ? d.date : '';
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const sh = programsSheet_();
+    const now = Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm');
+    const vals = (id, added) => [[id, type, title, String(d.desc || '').slice(0, 2000), date, serial, tname, halaqa, String(d.prize || '').slice(0, 300), String(d.winners || '').slice(0, 600), status, added, now]];
+    if (d.id) {
+      const p = readPrograms_().find(x => x.id === String(d.id));
+      if (!p || (!canEditAll && p.serial !== String(serial))) throw new Error('E_SNOTFOUND');
+      sh.getRange(p.sheetRow, 1, 1, 13).setNumberFormat('@').setValues(vals(p.id, p.added));
+    } else {
+      const r = sh.getLastRow() + 1;
+      sh.getRange(r, 1, 1, 13).setNumberFormat('@').setValues(vals(Utilities.getUuid().slice(0, 8), now));
+    }
+  } finally { lock.releaseLock(); }
+}
+
+function deleteProgram_(id, serial, canEditAll) {
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const p = readPrograms_().find(x => x.id === String(id));
+    if (!p || (!canEditAll && p.serial !== String(serial))) throw new Error('E_SNOTFOUND');
+    programsSheet_().deleteRow(p.sheetRow);
+  } finally { lock.releaseLock(); }
+}
+
+function listPrograms(row, phone) {
+  const a = auth_(row, phone);
+  const s = String(a.t.serial);
+  return readPrograms_().filter(p => p.serial === s || p.serial === '*').map(p => Object.assign(pubProgram_(p), { mine: p.serial === s }));
+}
+function saveProgram(row, phone, d) { const a = auth_(row, phone); saveProgram_(d, String(a.t.serial), a.t.name, a.t.halaqa, false); return listPrograms(row, phone); }
+function deleteProgram(row, phone, id) { const a = auth_(row, phone); deleteProgram_(id, String(a.t.serial), false); return listPrograms(row, phone); }
+
+function programsAdmin(phone) {
+  const acc = account_(phone);
+  if (!acc || !(acc.media || acc.stats || acc.manage)) throw new Error('E_AUTH');
+  const teachers = acc.manage ? teachersInfo_().list.map(t => ({ serial: t.serial, name: t.name, halaqa: t.halaqa })) : [];
+  return { programs: readPrograms_().map(pubProgram_), teachers: teachers, canEdit: !!acc.manage };
+}
+function programSaveAdmin(phone, d) {
+  manageAcc_(phone);
+  const s = clean_(d.serial);
+  const t = s && s !== '*' ? teachersInfo_().list.find(x => String(x.serial) === s) : null;
+  saveProgram_(d, t ? String(t.serial) : '*', t ? t.name : '', t ? t.halaqa : '', true);
+  return programsAdmin(phone);
+}
+function programDeleteAdmin(phone, id) { manageAcc_(phone); deleteProgram_(id, '', true); return programsAdmin(phone); }
+
+/* ================= صفحة «عن الحلقات» (عامة) ================= */
+function aboutSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(CONFIG.ABOUT_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(CONFIG.ABOUT_SHEET);
+    sh.appendRow(['المفتاح', 'العربية', 'English', 'বাংলা']);
+    sh.setFrozenRows(1); sh.setRightToLeft(true);
+    sh.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#123c34').setFontColor('#ffffff');
+  }
+  return sh;
+}
+
+function aboutGet() {
+  const teachers = teachersInfo_().list;
+  const rv = reportsSheet_().getDataRange().getValues().slice(1);
+  let photos = 0, videos = 0;
+  rv.forEach(r => { photos += [9, 10, 11, 12, 13].filter(k => r[k]).length; videos += [14, 15, 16].filter(k => r[k]).length; });
+  const regions = {}; teachers.forEach(t => { if (t.region) regions[t.region] = 1; });
+  const students = readStudents_().length;
+  const days = readDaily_().length;
+  const programs = readPrograms_();
+  const texts = {};
+  aboutSheet_().getDataRange().getValues().slice(1).forEach(r => { if (r[0]) texts[String(r[0])] = { ar: String(r[1] || ''), en: String(r[2] || ''), bn: String(r[3] || '') }; });
+  return {
+    stats: { circles: teachers.length, teachers: teachers.length, students: students, regions: Object.keys(regions).length, reports: rv.length, photos: photos, videos: videos, dailyLogs: days, programs: programs.length },
+    programs: programs.sort((a, b) => a.added < b.added ? 1 : -1).slice(0, 24).map(p => ({ type: p.type, title: p.title, desc: p.desc, date: p.date, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status })),
+    texts: texts
+  };
+}
+
+function aboutSave(phone, key, texts) {
+  manageAcc_(phone);
+  key = clean_(key);
+  if (!/^[a-zA-Z0-9_]{2,30}$/.test(key)) throw new Error('E_BAD');
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const sh = aboutSheet_();
+    const v = sh.getDataRange().getValues();
+    const vals = [[key, String(texts.ar || '').slice(0, 4000), String(texts.en || '').slice(0, 4000), String(texts.bn || '').slice(0, 4000)]];
+    let row = 0;
+    for (let i = 1; i < v.length; i++) if (String(v[i][0]) === key) { row = i + 1; break; }
+    sh.getRange(row || sh.getLastRow() + 1, 1, 1, 4).setValues(vals);
+  } finally { lock.releaseLock(); }
+  return aboutGet().texts;
+}
+
 /* ================= واجهة API (تُستدعى من صفحات GitHub Pages) ================= */
 const API_ = {
-  login: login, bootstrap: bootstrap, updateProfile: updateProfile,
+  login: login, loginKey: loginKey, bootstrap: bootstrap, updateProfile: updateProfile,
   startUpload: startUpload, checkUpload: checkUpload, submitReport: submitReport,
   listStudents: listStudents, saveStudent: saveStudent, deleteStudent: deleteStudent,
   listDaily: listDaily, saveDaily: saveDaily, deleteDaily: deleteDaily,
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
+  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks,
+  listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
+  aboutGet: aboutGet, aboutSave: aboutSave,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf
 };
 

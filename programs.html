@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>البرامج والأنشطة</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body data-title="navPrograms">
+<div class="wrap wide">
+  <header id="brand" class="brand"></header>
+  <main>
+    <nav id="topnav" class="topnav"></nav>
+    <div id="content">
+      <div class="card me"><div><h2 data-i18n="pgTitle"></h2><small data-i18n="pgSub"></small></div></div>
+      <div id="pgForm" class="card hidden">
+        <h2 data-i18n="pgAdd"></h2>
+        <div class="fbar">
+          <div><label class="f" for="gType" data-i18n="pgType"></label><select id="gType"><option value="program" data-i18n="pgProgram"></option><option value="activity" data-i18n="pgActivity"></option></select></div>
+          <div><label class="f" for="gStatus" data-i18n="pgStatus"></label><select id="gStatus"><option value="planned" data-i18n="pgPlanned"></option><option value="running" data-i18n="pgRunning"></option><option value="done" data-i18n="pgDone"></option></select></div>
+          <div><label class="f" for="gDate" data-i18n="pgDate"></label><input id="gDate" type="date"></div>
+        </div>
+        <label class="f" for="gTitle" data-i18n="pgTitleLbl"></label><input id="gTitle" type="text">
+        <label class="f" for="gCircle" data-i18n="pgCircle"></label><select id="gCircle"></select>
+        <label class="f" for="gDesc" data-i18n="pgDesc"></label><textarea id="gDesc" rows="3"></textarea>
+        <label class="f" for="gPrize" data-i18n="pgPrize"></label><input id="gPrize" type="text">
+        <label class="f" for="gWinners" data-i18n="pgWinners"></label><input id="gWinners" type="text">
+        <button id="btnProg" class="btn" data-i18n="pgSave"></button>
+        <button id="btnProgCancel" class="btn ghost hidden" data-i18n="cancel"></button>
+      </div>
+      <div id="gList"></div>
+    </div>
+  </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js?v=2"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n2.js"></script>
+<script src="js/common.js"></script>
+<script src="js/programs.js"></script>
+</body>
+</html>

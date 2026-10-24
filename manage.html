@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>إدارة النظام</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body data-title="navManage">
+<div class="wrap wide">
+  <header id="brand" class="brand"></header>
+  <main>
+    <nav id="topnav" class="topnav"></nav>
+    <div id="content">
+      <div class="card me"><div><h2 data-i18n="mgTitle"></h2></div></div>
+      <div class="tabs t3">
+        <button id="mT" class="on" data-i18n="mgTeachers"></button>
+        <button id="mU" data-i18n="mgUsers"></button>
+        <button id="mA" data-i18n="mgAbout"></button>
+      </div>
+
+      <div id="pT">
+        <div class="card">
+          <h2 data-i18n="addTeacher"></h2><p class="sub" data-i18n="addTeacherHint"></p>
+          <label class="f" for="tName" data-i18n="tName"></label><input id="tName" type="text">
+          <label class="f" for="tPhone" data-i18n="tPhone"></label><input id="tPhone" type="tel" inputmode="tel">
+          <label class="f" for="tMail" data-i18n="tMail"></label><input id="tMail" type="email">
+          <div class="fbar" style="margin-top:4px">
+            <div><label class="f" for="tRegion" data-i18n="tRegion"></label><input id="tRegion" type="text"></div>
+            <div><label class="f" for="tJiha" data-i18n="tJiha"></label><input id="tJiha" type="text"></div>
+          </div>
+          <div class="fbar">
+            <div><label class="f" for="tHalaqa" data-i18n="tHalaqa"></label><input id="tHalaqa" type="text"></div>
+            <div><label class="f" for="tStudents" data-i18n="tStudents"></label><input id="tStudents" type="number" min="0"></div>
+          </div>
+          <button id="btnTeacher" class="btn" data-i18n="addBtn"></button>
+        </div>
+        <div class="card">
+          <h2 data-i18n="mailTitle"></h2><p class="sub" data-i18n="mailHint"></p>
+          <button id="btnMail" class="btn ghost" data-i18n="mailSend"></button>
+          <p id="mailRes" class="sub" style="margin-top:12px"></p>
+        </div>
+      </div>
+
+      <div id="pU" class="hidden">
+        <div class="card">
+          <h2 data-i18n="addUser"></h2><p class="sub" data-i18n="usersHint"></p>
+          <label class="f" for="uCode" data-i18n="userCode"></label><input id="uCode" type="text" inputmode="numeric">
+          <label class="f" for="uName" data-i18n="userName"></label><input id="uName" type="text">
+          <label class="f" for="uRole" data-i18n="userRole"></label><select id="uRole"></select>
+          <button id="btnUser" class="btn" data-i18n="pgSave"></button>
+        </div>
+        <div id="uList"></div>
+      </div>
+
+      <div id="pA" class="hidden">
+        <div class="card">
+          <h2 data-i18n="mgAbout"></h2><p class="sub" data-i18n="aboutEditHint"></p>
+          <label class="f" for="abKey" data-i18n="aboutSection"></label><select id="abKey"></select>
+          <label class="f" for="abAr">العربية</label><textarea id="abAr" rows="4" dir="rtl"></textarea>
+          <label class="f" for="abEn">English</label><textarea id="abEn" rows="4" dir="ltr"></textarea>
+          <label class="f" for="abBn">বাংলা</label><textarea id="abBn" rows="4" dir="ltr"></textarea>
+          <button id="btnAbout" class="btn" data-i18n="saveText"></button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js?v=2"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n2.js"></script>
+<script src="js/common.js"></script>
+<script src="js/manage.js"></script>
+</body>
+</html>

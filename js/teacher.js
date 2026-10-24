@@ -67,8 +67,9 @@ function renderStatus(){
 }
 
 function tab(k){
-  ['r','d','s','p'].forEach(x => { const X = x.toUpperCase(); $('#pane' + X).classList.toggle('hidden', k !== x); $('#tab' + X).classList.toggle('on', k === x); });
+  ['r','d','s','g','p'].forEach(x => { const X = x.toUpperCase(); $('#pane' + X).classList.toggle('hidden', k !== x); $('#tab' + X).classList.toggle('on', k === x); });
   if(k === 's') loadStudents().catch(e => toast(err(e), true));
+  if(k === 'g') loadPrograms().catch(e => toast(err(e), true));
   if(k === 'd') loadDaily().catch(e => toast(err(e), true));
 }
 
@@ -319,3 +320,36 @@ if(!API_URL) $('#setup').classList.remove('hidden');
   if(s.admin){ location.replace(s.home || 'docs.html'); return; }
   try { await enter({ row:s.row }, s.phone); } catch(e){ store.clear(); show('v-login'); }
 })();
+
+
+/* ---------- البرامج والأنشطة الخاصة بالحلقة ---------- */
+const PG = { list:[], editing:null };
+async function loadPrograms(){ PG.list = await api.listPrograms(S.row, S.phone); renderPrograms(); }
+function renderPrograms(){
+  const box = $('#gList'); box.innerHTML = '';
+  if(!PG.list.length){ box.innerHTML = '<div class="empty"></div>'; box.firstChild.textContent = t('pgNone'); return; }
+  const grid = document.createElement('div'); grid.className = 'pgrid';
+  PG.list.slice().sort((a, b) => (b.date || '') < (a.date || '') ? -1 : 1).forEach(p => {
+    const c = progCard(p, false);
+    if(!p.mine){ const m = document.createElement('div'); m.className = 'meta'; m.textContent = t('pgGlobal'); c.appendChild(m); }
+    else {
+      const r = document.createElement('div'); r.className = 'acts';
+      const e = document.createElement('button'); e.className = 'linkbtn'; e.textContent = t('edit');
+      e.onclick = () => { PG.editing = p; $('#gType').value = p.type; $('#gStatus').value = p.status; $('#gDate').value = p.date; $('#gTitle').value = p.title; $('#gDesc').value = p.desc; $('#gPrize').value = p.prize; $('#gWinners').value = p.winners; $('#btnProgCancel').classList.remove('hidden'); window.scrollTo({ top:0, behavior:'smooth' }); };
+      const d = document.createElement('button'); d.className = 'linkbtn danger'; d.textContent = t('del');
+      d.onclick = async () => { if(!confirm(t('pgConfirmDel', p.title))) return; try { PG.list = await api.deleteProgram(S.row, S.phone, p.id); renderPrograms(); toast(t('pgDeleted')); } catch(x){ toast(err(x), true); } };
+      r.append(e, d); c.appendChild(r);
+    }
+    grid.appendChild(c);
+  });
+  box.appendChild(grid);
+}
+function resetProg(){ PG.editing = null; ['gTitle','gDate','gDesc','gPrize','gWinners'].forEach(i => $('#' + i).value = ''); $('#btnProgCancel').classList.add('hidden'); }
+$('#btnProgCancel').onclick = resetProg;
+$('#btnProg').onclick = async function(){
+  const b = this; load(b, true);
+  try {
+    PG.list = await api.saveProgram(S.row, S.phone, { id:PG.editing ? PG.editing.id : '', type:$('#gType').value, status:$('#gStatus').value, date:$('#gDate').value, title:$('#gTitle').value, desc:$('#gDesc').value, prize:$('#gPrize').value, winners:$('#gWinners').value });
+    resetProg(); renderPrograms(); toast(t('pgSaved'));
+  } catch(e){ toast(err(e), true); } finally { load(b, false); }
+};

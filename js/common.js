@@ -104,6 +104,9 @@ function renderNav(active, acc){
   if(acc.stats) items.push(['admin.html', 'navDash', 'dash']);
   if(acc.media) items.push(['docs.html', 'navDocs', 'docs']);
   if(acc.contacts) items.push(['teachers.html', 'navTeachers', 'teachers']);
+  if(acc.stats || acc.media || acc.manage) items.push(['programs.html', 'navPrograms', 'programs']);
+  if(acc.manage) items.push(['manage.html', 'navManage', 'manage']);
+  items.push(['about.html', 'navAbout', 'about']);
   const nav = $('#topnav'); nav.innerHTML = '';
   items.forEach(i => { const a = document.createElement('a'); a.href = i[0]; a.dataset.i18n = i[1]; if(i[2] === active){ a.className = 'on'; a.setAttribute('aria-current', 'page'); } nav.appendChild(a); });
   const o = document.createElement('button'); o.className = 'out'; o.dataset.i18n = 'logout'; o.onclick = logout; nav.appendChild(o);
@@ -119,7 +122,7 @@ async function adminGuard(active, need){
   catch(e){ toast(err(e), true); return null; }
   if(!r.ok || !r.admin){ store.clear(); location.replace('index.html'); return null; }
   const acc = r.admin;
-  if(!acc[need]){ location.replace(acc.stats ? 'admin.html' : (acc.media ? 'docs.html' : 'index.html')); return null; }
+  if(need && !acc[need]){ location.replace(acc.stats ? 'admin.html' : (acc.media ? 'docs.html' : 'index.html')); return null; }
   renderNav(active, acc);
   return { phone: s.phone, acc: acc };
 }
@@ -158,4 +161,20 @@ function logoPng(){
     const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0);
     return c.toDataURL('image/png');
   } catch(e){ return ''; }
+}
+
+/* ---------- بطاقة برنامج / نشاط (تُستخدم في عدة صفحات) ---------- */
+function progCard(p, withCircle){
+  const d = document.createElement('div'); d.className = 'pcard ' + p.status;
+  const h = document.createElement('div'); h.className = 'ph2';
+  const ty = document.createElement('span'); ty.className = 'badge ' + (p.type === 'activity' ? 'no2' : 'ok'); ty.textContent = t(p.type === 'activity' ? 'pgActivity' : 'pgProgram');
+  const st = document.createElement('span'); st.className = 'badge st'; st.textContent = t({ planned:'pgPlanned', running:'pgRunning', done:'pgDone' }[p.status] || 'pgPlanned');
+  h.append(ty, st); d.appendChild(h);
+  const ti = document.createElement('h3'); ti.textContent = p.title; d.appendChild(ti);
+  const meta = [p.date ? dateBoth(p.date) : '', withCircle ? (p.serial === '*' ? t('pgAll') : (p.halaqa || p.teacher)) : ''].filter(Boolean).join(' — ');
+  if(meta){ const m = document.createElement('div'); m.className = 'meta'; m.textContent = meta; d.appendChild(m); }
+  if(p.desc){ const x = document.createElement('p'); x.textContent = p.desc; d.appendChild(x); }
+  if(p.prize){ const x = document.createElement('div'); x.className = 'prize'; x.textContent = t('pgPrizeLbl', p.prize); d.appendChild(x); }
+  if(p.winners){ const x = document.createElement('div'); x.className = 'meta'; x.textContent = t('pgWinLbl', p.winners); d.appendChild(x); }
+  return d;
 }

@@ -48,6 +48,7 @@ function section(r){
   h.querySelector('h3').textContent = r.name;
   h.querySelector('.m1').textContent = [r.halaqa && t('halaqa', r.halaqa), r.jiha, r.region].filter(Boolean).join(' — ');
   h.querySelector('.m2').textContent = t('repDate', r.date + (r.dateH ? ' — ' + r.dateH : ''));
+  const fl = document.createElement('a'); fl.href = 'file.html?s=' + r.serial; fl.textContent = t('fileTitle'); fl.className = 'linkbtn'; fl.style.cssText = 'display:inline-block;margin-top:6px;text-decoration:none'; h.querySelector('.m2').appendChild(document.createElement('br')); h.querySelector('.m2').appendChild(fl);
   s.appendChild(h);
 
   if(D.filter !== 'videos' && r.photos.length){

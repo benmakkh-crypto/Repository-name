@@ -189,3 +189,27 @@ html[dir=rtl] .lb .nv{transform:scaleX(-1)}
 .te .tx{font-size:14px;color:#2b3d49;margin-top:4px}
 .te .tx div{padding:1px 0}
 .notice{margin-bottom:16px}
+
+/* ===== الميزات الجديدة ===== */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:16px}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--sh1);border-top:4px solid var(--gold)}
+.pcard.done{border-top-color:var(--ok)}.pcard.running{border-top-color:var(--blue)}
+.pcard .ph2{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.pcard h3{font:700 19px/1.5 'Amiri','Hind Siliguri',serif;color:var(--pri-d);margin:0 0 4px}
+.pcard p{margin:8px 0;line-height:1.7;font-size:15px;white-space:pre-line}
+.pcard .prize{background:var(--goldbg);border:1px solid #ecd9a0;color:#5b4710;border-radius:10px;padding:8px 12px;font-weight:700;margin:8px 0;font-size:14.5px}
+.badge.st{background:var(--soft);color:var(--pri-d)}.badge.no2{background:var(--goldbg);color:#7a5c10}
+.acts{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.linkbtn.danger{color:var(--err)}
+.urow h3{margin:0 0 2px;font-size:17px}
+.ab-hero{text-align:center;background:linear-gradient(135deg,var(--pri-d),var(--pri));color:#fff;border:0;padding:34px 20px}
+.card.ab-hero h2{color:#fff;font:700 28px/1.5 'Amiri','Hind Siliguri',serif;margin:0 0 8px}.ab-hero p{margin:0;opacity:.92}
+.ab-h{font:700 22px 'Amiri','Hind Siliguri',serif;color:var(--pri-d);margin:26px 4px 12px}
+.ab-stats{grid-template-columns:repeat(3,1fr)}
+.ab-sec h3{font:700 21px 'Amiri','Hind Siliguri',serif;color:var(--pri-d);margin:0 0 10px}
+.ab-sec p{line-height:2;margin:0;white-space:pre-line}
+.ab-sec ul{margin:0;padding-inline-start:22px;line-height:2}
+.ab-sec li::marker{color:var(--gold)}
+textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;resize:vertical}
+@media(max-width:640px){.ab-stats{grid-template-columns:repeat(2,1fr)}.stats.s4{grid-template-columns:repeat(2,1fr)}}
+.ab-link{display:block;text-align:center;margin-top:18px;color:var(--pri);font-weight:700}
