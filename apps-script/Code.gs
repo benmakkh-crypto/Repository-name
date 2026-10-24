@@ -53,10 +53,22 @@ function normPhone_(p) {
   return s.replace(/^0+/, '');
 }
 
+/** ورقة المعلمين: بالاسم إن حُدد، وإلا أول ورقة (غير أوراق النظام) فيها عناوين «الاسم» و«الجوال» */
+function teachersSheet_(ss) {
+  if (CONFIG.TEACHERS_SHEET) { const x = ss.getSheetByName(CONFIG.TEACHERS_SHEET); if (x) return x; }
+  const ours = [CONFIG.USERS_SHEET, CONFIG.REPORTS_SHEET, CONFIG.STUDENTS_SHEET, CONFIG.DAILY_SHEET, CONFIG.PROGRAMS_SHEET, CONFIG.ABOUT_SHEET];
+  const all = ss.getSheets().filter(x => ours.indexOf(x.getName()) < 0);
+  for (let k = 0; k < all.length; k++) {
+    const v = all[k].getRange(1, 1, Math.min(15, Math.max(1, all[k].getLastRow())), Math.max(1, all[k].getLastColumn())).getValues();
+    if (v.some(r => r.some(c => clean_(c).indexOf('الجوال') > -1) && r.some(c => clean_(c) === 'الاسم'))) return all[k];
+  }
+  return all[0] || ss.getSheets()[0];
+}
+
 /** قراءة ورقة المعلمين: يكتشف صف العناوين والأعمدة تلقائياً من أسمائها */
 function teachersInfo_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sh = CONFIG.TEACHERS_SHEET ? ss.getSheetByName(CONFIG.TEACHERS_SHEET) : ss.getSheets()[0];
+  const sh = teachersSheet_(ss);
   const vals = sh.getDataRange().getValues();
   let h = -1;
   for (let i = 0; i < Math.min(vals.length, 15); i++) {
@@ -191,6 +203,8 @@ function usersSheet_() {
       sh.appendRow([a.phone, a.name, a.role, yn_(a.stats), yn_(a.contacts), yn_(a.media), yn_(a.export), yn_(a.manage), 'نعم', newKey_(), Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd')]);
     });
   }
+  const stray = sh.getRange(1, USER_HEADERS.length + 1);
+  if (clean_(stray.getValue()) === 'البريد الإلكتروني') stray.clearContent();
   return sh;
 }
 
