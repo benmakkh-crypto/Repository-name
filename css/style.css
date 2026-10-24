@@ -220,3 +220,73 @@ textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line
 .cc svg{display:block;max-width:100%;height:auto}
 .badge.by.adm{background:#fbf1d6;color:#7a5c10}.badge.by.tch{background:#e4ebfb;color:#1d44b8}
 @media(max-width:760px){.cgrid{grid-template-columns:1fr}}
+
+/* ===== الواجهة الداخلية: ألوان زاهية وأرقام بارزة ===== */
+:root{--v-green:#12b76a;--v-green2:#0e9f5c;--v-blue:#2563eb;--v-blue2:#1d4ed8;--v-orange:#f59e0b;--v-orange2:#ea7a0b;--v-purple:#7c3aed;--v-purple2:#6d28d9;--v-red:#ef4444;--v-red2:#dc2626;--v-teal:#0ea5a4;--v-teal2:#0b8a8a}
+/* بطاقات الأرقام */
+.stat{border:0;color:#fff;padding:18px 8px 16px;background:linear-gradient(135deg,var(--v-blue),var(--v-blue2));box-shadow:0 8px 20px rgba(37,99,235,.28);transition:transform .15s}
+.stat:hover{transform:translateY(-2px)}
+.stat::before{display:none}
+.stat::after{content:"";position:absolute;inset-inline-end:-18px;top:-18px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.14)}
+.stat b,.stat.ok b,.stat.no b,.stat.blue b{color:#fff;font:800 40px/1.15 'Tajawal','Hind Siliguri',sans-serif;text-shadow:0 2px 8px rgba(0,0,0,.18);letter-spacing:.5px}
+.stat span{color:rgba(255,255,255,.95);font-weight:700;font-size:13.5px}
+.stat.ok{background:linear-gradient(135deg,var(--v-green),var(--v-green2));box-shadow:0 8px 20px rgba(18,183,106,.3)}
+.stat.no{background:linear-gradient(135deg,var(--v-red),var(--v-red2));box-shadow:0 8px 20px rgba(239,68,68,.3)}
+.stat.blue{background:linear-gradient(135deg,var(--v-blue),var(--v-blue2))}
+.stat.gold{background:linear-gradient(135deg,var(--v-orange),var(--v-orange2));box-shadow:0 8px 20px rgba(245,158,11,.3)}
+.stats .stat:nth-child(4n+3):not(.ok):not(.no):not(.blue){background:linear-gradient(135deg,var(--v-orange),var(--v-orange2));box-shadow:0 8px 20px rgba(245,158,11,.3)}
+.stats .stat:nth-child(4n):not(.ok):not(.no):not(.blue){background:linear-gradient(135deg,var(--v-purple),var(--v-purple2));box-shadow:0 8px 20px rgba(124,58,237,.3)}
+.stats .stat:nth-child(4n+2):not(.ok):not(.no):not(.blue){background:linear-gradient(135deg,var(--v-teal),var(--v-teal2));box-shadow:0 8px 20px rgba(14,165,164,.3)}
+.meter{height:14px;background:#d8e4ee;border-radius:10px}
+.meter i{background:linear-gradient(90deg,var(--v-green),#4ade80)}
+/* رأس الصفحة */
+.me{background:linear-gradient(135deg,#0f766e,#2563eb);color:#fff;border:0;border-radius:18px;box-shadow:0 10px 26px rgba(37,99,235,.25)}
+.me h2{color:#fff;font-family:'Tajawal','Hind Siliguri',sans-serif;font-weight:800;font-size:22px}
+.me small{color:rgba(255,255,255,.9)}
+.me .linkbtn{color:#fff;background:rgba(255,255,255,.18);border-radius:30px;padding:6px 16px}
+.me .linkbtn:hover{background:rgba(255,255,255,.3)}
+/* القائمة والتبويبات */
+.topnav{background:#fff;border:0;box-shadow:0 6px 20px rgba(16,40,52,.12);padding:8px}
+.topnav a{font-weight:700;color:#3b4b57;border-radius:12px}
+.topnav a:hover{background:#eef6ff;color:var(--v-blue)}
+.topnav a.on{background:linear-gradient(135deg,var(--v-green),var(--v-teal));color:#fff;box-shadow:0 4px 12px rgba(14,165,164,.35)}
+.topnav a::before{margin-inline-end:6px}
+.topnav a[href^="admin"]::before{content:"📊"}.topnav a[href^="docs"]::before{content:"🖼️"}.topnav a[href^="insights"]::before{content:"📈"}
+.topnav a[href^="teachers"]::before{content:"👥"}.topnav a[href^="programs"]::before{content:"🏆"}.topnav a[href^="manage"]::before{content:"⚙️"}.topnav a[href^="about"]::before{content:"📖"}
+.topnav .out{background:#fff1f1;color:var(--v-red2);border-color:#ffd0d0;font-weight:700}
+.tabs{background:#fff;box-shadow:0 6px 18px rgba(16,40,52,.1);padding:6px;gap:6px}
+.tabs button{font-weight:700;color:#3b4b57;padding:12px 6px;border-radius:12px}
+.tabs button:hover{background:#eef6ff;color:var(--v-blue)}
+.tabs button.on{background:linear-gradient(135deg,var(--v-blue),var(--v-purple));color:#fff;box-shadow:0 5px 14px rgba(79,70,229,.35)}
+#tabR::before{content:"📝 "}#tabD::before{content:"📅 "}#tabS::before{content:"🎓 "}#tabG::before{content:"🏆 "}#tabP::before{content:"👤 "}
+.t5 button{font-size:13px;padding:11px 2px}
+/* بطاقات وعناصر */
+.card{border:0;box-shadow:0 6px 22px rgba(16,40,52,.09)}
+.card h2{color:var(--v-blue2)}
+.btn{background:linear-gradient(135deg,var(--v-green),var(--v-green2));box-shadow:0 8px 20px rgba(18,183,106,.32)}
+.btn.ghost{background:#fff;color:var(--v-blue2);border-color:var(--v-blue);box-shadow:none}
+.btn.ghost:hover{background:#eef4ff}
+.badge{font-weight:700}
+.badge.ok{background:var(--v-green);color:#fff}.badge.no{background:var(--v-red);color:#fff}
+.badge.st{background:#eef2ff;color:var(--v-purple2)}.badge.no2{background:#fff4dc;color:#b45309}
+.badge.by.adm{background:var(--v-orange);color:#fff}.badge.by.tch{background:var(--v-blue);color:#fff}
+.item{border:0;box-shadow:0 4px 16px rgba(16,40,52,.09);border-inline-start:5px solid var(--v-blue)}
+.item[open]{box-shadow:0 8px 24px rgba(37,99,235,.18)}
+.item>summary b{color:#0b2a4a;font-size:16.5px}
+.pill{background:#e8f1ff;color:var(--v-blue2);font-weight:700}
+.pcard{border:0;box-shadow:0 6px 20px rgba(16,40,52,.1);border-top:5px solid var(--v-orange)}
+.pcard.running{border-top-color:var(--v-blue)}.pcard.done{border-top-color:var(--v-green)}
+.pcard .prize{background:linear-gradient(135deg,#fff7e0,#ffeab5);border-color:#f5cf6b;color:#7a4a00}
+.dsec{border:0;box-shadow:0 6px 20px rgba(16,40,52,.09);border-top:5px solid var(--v-teal)}
+.dsec h3{color:#0b2a4a}
+.cc h3{color:var(--v-blue2);font-family:'Tajawal','Hind Siliguri',sans-serif;font-weight:800}
+.contact a,.contact button{border-color:var(--v-blue);color:var(--v-blue2);font-weight:700}
+.contact a:hover,.contact button:hover{background:var(--v-blue);color:#fff}
+.ab-hero{background:linear-gradient(135deg,#0f766e,#2563eb 60%,#7c3aed)!important}
+.ab-sec{border-top:5px solid var(--v-purple)}.ab-sec:nth-of-type(3n+1){border-top-color:var(--v-green)}.ab-sec:nth-of-type(3n+2){border-top-color:var(--v-orange)}
+.ab-sec h3{color:#0b2a4a;font-family:'Tajawal','Hind Siliguri',sans-serif;font-weight:800}
+.ab-h{color:#0b2a4a;font-family:'Tajawal','Hind Siliguri',sans-serif;font-weight:800}
+.abBtn{display:block;text-align:center;text-decoration:none;color:#fff;font-weight:800;padding:13px;border-radius:14px;margin:0 0 14px;background:linear-gradient(135deg,var(--v-purple),var(--v-blue));box-shadow:0 8px 20px rgba(124,58,237,.3)}
+.abBtn::before{content:"📖 "}
+#tKpi{margin-bottom:14px}
+.card.me h2{color:#fff}

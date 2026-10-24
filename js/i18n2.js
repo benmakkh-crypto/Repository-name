@@ -86,6 +86,10 @@ dateRange:['اختر تاريخاً صحيحاً للتقرير','Choose a valid
 openNow:['يمكنك رفع تقرير شهر {0} (اختر أي تاريخ: سابق أو حالي أو قادم)','You can upload the report for {0} (any date: past, present or future)','{0} মাসের প্রতিবেদন জমা দিতে পারেন (যেকোনো তারিখ: অতীত, বর্তমান বা ভবিষ্যৎ)'],
 E_DDATE:['التاريخ غير صحيح','Invalid date','তারিখ সঠিক নয়'],
 E_DATE:['تاريخ التقرير غير صحيح','Invalid report date','প্রতিবেদনের তারিখ সঠিক নয়'],
+kpiReport:['تقرير هذا الشهر','This month\'s report','এ মাসের প্রতিবেদন'],
+kpiDays:['أيام الإنجاز هذا الشهر','Days logged this month','এ মাসে লিখিত দিন'],
+kpiProgs:['البرامج والأنشطة','Programs & activities','কর্মসূচি ও কার্যক্রম'],
+aboutLink:['تعرّف على حلقات القرآن الكريم','Learn about the Quran circles','কুরআন হালাকা সম্পর্কে জানুন'],
 /* ملف المعلم */
 fileTitle:['ملف الحلقة','Circle file','হালাকার ফাইল'],
 fileSub:['صور ومقاطع كل التقارير الشهرية للحلقة في ملف واحد.','Photos and videos of all monthly reports in one file.','সব মাসিক প্রতিবেদনের ছবি ও ভিডিও এক ফাইলে।'],

@@ -36,6 +36,7 @@ function render(){
 
 (async function init(){
   const s = store.get();
+  if(!s){ location.replace('index.html'); return; }
   if(s && s.admin){ try { const r = await api.login(s.phone); if(r.ok && r.admin) renderNav('about', r.admin); else $('#topnav').classList.add('hidden'); } catch(e){ $('#topnav').classList.add('hidden'); } }
   else $('#topnav').classList.add('hidden');
   try { AB.data = await api.aboutGet(); render(); } catch(e){ toast(err(e), true); }

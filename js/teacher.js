@@ -35,7 +35,7 @@ async function enter(x, phone){
   const r = await api.bootstrap(x.row, phone);
   Object.assign(S, { row:x.row, phone:phone, t:r.teacher, w:r.window, reports:r.reports || {} });
   store.set({ row:x.row, phone:phone });
-  renderApp(); show('v-app'); tab('r');
+  renderApp(); show('v-app'); tab('r'); loadKpi();
 }
 
 function logout(){ store.clear(); Object.keys(F).forEach(k => delete F[k]); S.t = null; $('#phone').value = ''; show('v-login'); }  // خروج المعلم (يستبدل نسخة common.js)
@@ -350,3 +350,14 @@ $('#btnProg').onclick = async function(){
     resetProg(); renderPrograms(); toast(t('pgSaved'));
   } catch(e){ toast(err(e), true); } finally { load(b, false); }
 };
+
+
+/* أرقام لوحة المعلم */
+async function loadKpi(){
+  const m = S.w.month, rep = (S.reports || {})[m];
+  $('#kRep').textContent = rep ? '✔' : '✖'; $('#kRep').parentNode.className = 'stat ' + (rep ? 'ok' : 'no');
+  $('#kStu').textContent = S.t.students || '0';
+  try { const r = await api.listStudents(S.row, S.phone); $('#kStu').textContent = r.students.length; } catch(e){}
+  try { const r = await api.listDaily(S.row, S.phone); $('#kDays').textContent = r.entries.filter(e => e.date.indexOf(m) === 0).length; } catch(e){}
+  try { const r = await api.listPrograms(S.row, S.phone); $('#kProg').textContent = r.length; } catch(e){}
+}
