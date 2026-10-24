@@ -1,6 +1,6 @@
 /* البرامج والأنشطة الخاصة والجوائز (عرض للجميع، وتحرير للمشرف العام) */
 renderBrand(true);
-const G = { phone:'', data:null, edit:null };
+const G = { phone:'', data:null, edit:null, src:'all' };
 window.onLangChange = () => { if(G.data){ fillCircles(); render(); } };
 applyLang();
 
@@ -12,7 +12,8 @@ function fillCircles(){
 }
 function render(){
   const box = $('#gList'); box.innerHTML = '';
-  const ps = G.data.programs.slice().sort((a, b) => (b.date || '') < (a.date || '') ? -1 : 1);
+  const ps = G.data.programs.filter(p => G.src === 'all' || p.by === G.src).sort((a, b) => (b.date || '') < (a.date || '') ? -1 : 1);
+  $('#pgCount').textContent = t('pgCnt', ps.length);
   if(!ps.length){ box.innerHTML = '<div class="empty"></div>'; box.firstChild.textContent = t('pgNone'); return; }
   const grid = document.createElement('div'); grid.className = 'pgrid';
   ps.forEach(p => {
@@ -54,3 +55,5 @@ $('#btnProg').onclick = async function(){
     render();
   } catch(e){ toast(err(e), true); }
 })();
+
+[['sAll','all'],['sAdm','admin'],['sTch','teacher']].forEach(x => { $('#' + x[0]).onclick = () => { G.src = x[1]; [['sAll','all'],['sAdm','admin'],['sTch','teacher']].forEach(y => $('#' + y[0]).classList.toggle('on', y[1] === x[1])); render(); }; });

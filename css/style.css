@@ -213,3 +213,10 @@ html[dir=rtl] .lb .nv{transform:scaleX(-1)}
 textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;resize:vertical}
 @media(max-width:640px){.ab-stats{grid-template-columns:repeat(2,1fr)}.stats.s4{grid-template-columns:repeat(2,1fr)}}
 .ab-link{display:block;text-align:center;margin-top:18px;color:var(--pri);font-weight:700}
+
+.cgrid{align-items:start;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cgrid .wide{grid-column:1/-1}
+.cc{margin-bottom:0}.cc h3{font:700 18px 'Amiri','Hind Siliguri',serif;color:var(--pri-d);margin:0 0 10px}
+.cc svg{display:block;max-width:100%;height:auto}
+.badge.by.adm{background:#fbf1d6;color:#7a5c10}.badge.by.tch{background:#e4ebfb;color:#1d44b8}
+@media(max-width:760px){.cgrid{grid-template-columns:1fr}}

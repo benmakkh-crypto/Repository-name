@@ -103,6 +103,7 @@ function renderNav(active, acc){
   const items = [];
   if(acc.stats) items.push(['admin.html', 'navDash', 'dash']);
   if(acc.media) items.push(['docs.html', 'navDocs', 'docs']);
+  if(acc.stats) items.push(['insights.html', 'navInsights', 'insights']);
   if(acc.contacts) items.push(['teachers.html', 'navTeachers', 'teachers']);
   if(acc.stats || acc.media || acc.manage) items.push(['programs.html', 'navPrograms', 'programs']);
   if(acc.manage) items.push(['manage.html', 'navManage', 'manage']);
@@ -167,9 +168,10 @@ function logoPng(){
 function progCard(p, withCircle){
   const d = document.createElement('div'); d.className = 'pcard ' + p.status;
   const h = document.createElement('div'); h.className = 'ph2';
+  const by = document.createElement('span'); by.className = 'badge by ' + (p.by === 'admin' ? 'adm' : 'tch'); by.textContent = t(p.by === 'admin' ? 'pgByAdmin' : 'pgByTeacher');
   const ty = document.createElement('span'); ty.className = 'badge ' + (p.type === 'activity' ? 'no2' : 'ok'); ty.textContent = t(p.type === 'activity' ? 'pgActivity' : 'pgProgram');
   const st = document.createElement('span'); st.className = 'badge st'; st.textContent = t({ planned:'pgPlanned', running:'pgRunning', done:'pgDone' }[p.status] || 'pgPlanned');
-  h.append(ty, st); d.appendChild(h);
+  h.append(by, ty, st); d.appendChild(h);
   const ti = document.createElement('h3'); ti.textContent = p.title; d.appendChild(ti);
   const meta = [p.date ? dateBoth(p.date) : '', withCircle ? (p.serial === '*' ? t('pgAll') : (p.halaqa || p.teacher)) : ''].filter(Boolean).join(' — ');
   if(meta){ const m = document.createElement('div'); m.className = 'meta'; m.textContent = meta; d.appendChild(m); }

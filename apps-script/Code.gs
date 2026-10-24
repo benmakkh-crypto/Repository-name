@@ -908,7 +908,7 @@ function emailLinks(phone, serials, siteUrl) {
 function authorize() { return MailApp.getRemainingDailyQuota(); }
 
 /* ================= البرامج والأنشطة والجوائز ================= */
-const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل'];
+const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل', 'المصدر'];
 
 function programsSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -920,6 +920,7 @@ function programsSheet_() {
     sh.setFrozenRows(1); sh.setRightToLeft(true);
     sh.getRange(1, 1, 1, PROGRAM_HEADERS.length).setFontWeight('bold').setBackground('#123c34').setFontColor('#ffffff');
   }
+  if (!sh.getRange(1, 14).getValue()) sh.getRange(1, 14).setValue('المصدر').setFontWeight('bold').setBackground('#123c34').setFontColor('#ffffff');
   return sh;
 }
 
@@ -930,12 +931,12 @@ function readPrograms_() {
     const r = v[i];
     if (!r[0]) continue;
     out.push({ sheetRow: i + 1, id: String(r[0]), type: String(r[1]), title: clean_(r[2]), desc: String(r[3] || ''), date: String(r[4] || ''),
-      serial: String(r[5]), teacher: String(r[6] || ''), halaqa: String(r[7] || ''), prize: String(r[8] || ''), winners: String(r[9] || ''), status: String(r[10] || 'planned'), added: String(r[11] || '') });
+      serial: String(r[5]), teacher: String(r[6] || ''), halaqa: String(r[7] || ''), prize: String(r[8] || ''), winners: String(r[9] || ''), status: String(r[10] || 'planned'), added: String(r[11] || ''), by: String(r[13] || (String(r[5]) === '*' ? 'admin' : 'teacher')) });
   }
   return out;
 }
 
-const pubProgram_ = p => ({ id: p.id, type: p.type, title: p.title, desc: p.desc, date: p.date, serial: p.serial, teacher: p.teacher, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status });
+const pubProgram_ = p => ({ id: p.id, type: p.type, title: p.title, desc: p.desc, date: p.date, serial: p.serial, teacher: p.teacher, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status, by: p.by });
 
 function saveProgram_(d, serial, tname, halaqa, canEditAll) {
   const title = clean_(d.title);
@@ -947,14 +948,14 @@ function saveProgram_(d, serial, tname, halaqa, canEditAll) {
   try {
     const sh = programsSheet_();
     const now = Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm');
-    const vals = (id, added) => [[id, type, title, String(d.desc || '').slice(0, 2000), date, serial, tname, halaqa, String(d.prize || '').slice(0, 300), String(d.winners || '').slice(0, 600), status, added, now]];
+    const vals = (id, added) => [[id, type, title, String(d.desc || '').slice(0, 2000), date, serial, tname, halaqa, String(d.prize || '').slice(0, 300), String(d.winners || '').slice(0, 600), status, added, now, canEditAll ? 'admin' : 'teacher']];
     if (d.id) {
       const p = readPrograms_().find(x => x.id === String(d.id));
-      if (!p || (!canEditAll && p.serial !== String(serial))) throw new Error('E_SNOTFOUND');
-      sh.getRange(p.sheetRow, 1, 1, 13).setNumberFormat('@').setValues(vals(p.id, p.added));
+      if (!p || (!canEditAll && (p.serial !== String(serial) || p.by === 'admin'))) throw new Error('E_SNOTFOUND');
+      sh.getRange(p.sheetRow, 1, 1, 14).setNumberFormat('@').setValues(vals(p.id, p.added));
     } else {
       const r = sh.getLastRow() + 1;
-      sh.getRange(r, 1, 1, 13).setNumberFormat('@').setValues(vals(Utilities.getUuid().slice(0, 8), now));
+      sh.getRange(r, 1, 1, 14).setNumberFormat('@').setValues(vals(Utilities.getUuid().slice(0, 8), now));
     }
   } finally { lock.releaseLock(); }
 }
@@ -963,7 +964,7 @@ function deleteProgram_(id, serial, canEditAll) {
   const lock = LockService.getScriptLock(); lock.waitLock(30000);
   try {
     const p = readPrograms_().find(x => x.id === String(id));
-    if (!p || (!canEditAll && p.serial !== String(serial))) throw new Error('E_SNOTFOUND');
+    if (!p || (!canEditAll && (p.serial !== String(serial) || p.by === 'admin'))) throw new Error('E_SNOTFOUND');
     programsSheet_().deleteRow(p.sheetRow);
   } finally { lock.releaseLock(); }
 }
@@ -971,7 +972,7 @@ function deleteProgram_(id, serial, canEditAll) {
 function listPrograms(row, phone) {
   const a = auth_(row, phone);
   const s = String(a.t.serial);
-  return readPrograms_().filter(p => p.serial === s || p.serial === '*').map(p => Object.assign(pubProgram_(p), { mine: p.serial === s }));
+  return readPrograms_().filter(p => p.serial === s || p.serial === '*').map(p => Object.assign(pubProgram_(p), { mine: p.serial === s && p.by === 'teacher' }));
 }
 function saveProgram(row, phone, d) { const a = auth_(row, phone); saveProgram_(d, String(a.t.serial), a.t.name, a.t.halaqa, false); return listPrograms(row, phone); }
 function deleteProgram(row, phone, id) { const a = auth_(row, phone); deleteProgram_(id, String(a.t.serial), false); return listPrograms(row, phone); }
@@ -1017,7 +1018,7 @@ function aboutGet() {
   aboutSheet_().getDataRange().getValues().slice(1).forEach(r => { if (r[0]) texts[String(r[0])] = { ar: String(r[1] || ''), en: String(r[2] || ''), bn: String(r[3] || '') }; });
   return {
     stats: { circles: teachers.length, teachers: teachers.length, students: students, regions: Object.keys(regions).length, reports: rv.length, photos: photos, videos: videos, dailyLogs: days, programs: programs.length },
-    programs: programs.sort((a, b) => a.added < b.added ? 1 : -1).slice(0, 24).map(p => ({ type: p.type, title: p.title, desc: p.desc, date: p.date, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status })),
+    programs: programs.sort((a, b) => a.added < b.added ? 1 : -1).slice(0, 24).map(p => ({ by: p.by, serial: p.serial, type: p.type, title: p.title, desc: p.desc, date: p.date, halaqa: p.halaqa, prize: p.prize, winners: p.winners, status: p.status })),
     texts: texts
   };
 }
@@ -1038,6 +1039,172 @@ function aboutSave(phone, key, texts) {
   return aboutGet().texts;
 }
 
+/* ================= الرسوم والتحليلات + التقرير الشهري الشامل ================= */
+const num_ = v => { const n = parseFloat(String(v == null ? '' : v).replace(/[^\d.]/g, '')); return isNaN(n) ? 0 : n; };
+const areaParts_ = region => { const p = String(region || '').split(/[،,\-\.]/).map(x => x.trim()).filter(Boolean); return { area: p[0] || '', district: p.length > 1 ? p[p.length - 1] : (p[0] || '') }; };
+const bucket_ = (v, edges) => { for (let i = 0; i < edges.length; i++) if (v <= edges[i]) return i; return edges.length; };
+
+function monthShift_(month, k) {
+  const y = +month.slice(0, 4), m = +month.slice(5) - 1 + k;
+  const d = new Date(y, m, 1);
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+}
+
+/** ملخص شهر كامل: يُستخدم في الرسوم وفي ملفات Excel/PDF */
+function monthSummary_(month) {
+  const teachers = teachersInfo_().list;
+  const rv = reportsSheet_().getDataRange().getValues().slice(1);
+  const students = readStudents_();
+  const daily = readDaily_().filter(d => d.date.indexOf(month) === 0);
+  const programs = readPrograms_();
+
+  const repBy = {};
+  rv.forEach(r => { if (String(r[1]) === month) repBy[String(r[3])] = r; });
+  const regCount = {}; students.forEach(x => { regCount[x.serial] = (regCount[x.serial] || 0) + 1; });
+  const dBy = {}; daily.forEach(d => { (dBy[d.serial] = dBy[d.serial] || []).push(d); });
+
+  const circles = teachers.map(t => {
+    const r = repBy[String(t.serial)], ds = dBy[String(t.serial)] || [];
+    const ap = areaParts_(t.region);
+    return { serial: t.serial, name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region, area: ap.area, district: ap.district, phone: t.phone,
+      declared: num_(t.students), registered: regCount[String(t.serial)] || 0, submitted: !!r, date: r ? String(r[2]) : '', dateH: r ? String(r[20] || '') : '',
+      photos: r ? [9, 10, 11, 12, 13].filter(k => r[k]).length : 0, videos: r ? [14, 15, 16].filter(k => r[k]).length : 0,
+      days: ds.length, avgAtt: ds.length ? Math.round(ds.reduce((a, d) => a + d.att, 0) / ds.length) : 0 };
+  });
+
+  const trend = [];
+  for (let i = 11; i >= 0; i--) {
+    const m = monthShift_(month, -i);
+    let rep = 0, ph = 0, vi = 0;
+    rv.forEach(r => { if (String(r[1]) === m) { rep++; ph += [9, 10, 11, 12, 13].filter(k => r[k]).length; vi += [14, 15, 16].filter(k => r[k]).length; } });
+    trend.push({ month: m, reports: rep, photos: ph, videos: vi });
+  }
+
+  const byDistrict = {}, byArea = {};
+  circles.forEach(c => {
+    [[byDistrict, c.district], [byArea, c.area]].forEach(p => {
+      const k = p[1] || '-'; const o = p[0][k] = p[0][k] || { name: k, circles: 0, students: 0, submitted: 0 };
+      o.circles++; o.students += c.registered || c.declared; if (c.submitted) o.submitted++;
+    });
+  });
+  const list = o => Object.keys(o).map(k => o[k]).sort((a, b) => b.students - a.students);
+
+  const juzE = [0, 5, 10, 15, 20, 25], ageE = [9, 12, 15, 18];
+  const juz = new Array(7).fill(0), age = new Array(5).fill(0);
+  students.forEach(x => { juz[bucket_(num_(x.juz), juzE)]++; age[bucket_(num_(x.age), ageE)]++; });
+
+  const dayMap = {};
+  daily.forEach(d => { const o = dayMap[d.date] = dayMap[d.date] || { date: d.date, att: 0, n: 0 }; o.att += d.att; o.n++; });
+  const days = Object.keys(dayMap).sort().map(k => dayMap[k]);
+
+  const prog = { total: programs.length, program: 0, activity: 0, admin: 0, teacher: 0, planned: 0, running: 0, done: 0 };
+  programs.forEach(p => { prog[p.type === 'activity' ? 'activity' : 'program']++; prog[p.by === 'admin' ? 'admin' : 'teacher']++; if (prog[p.status] !== undefined) prog[p.status]++; });
+
+  const submitted = circles.filter(c => c.submitted).length;
+  const withDaily = circles.filter(c => c.days > 0);
+  return {
+    month: month, circles: circles, trend: trend, districts: list(byDistrict), areas: list(byArea).slice(0, 12),
+    juz: juz, age: age, days: days, programs: prog, programList: programs,
+    top: circles.slice().sort((a, b) => b.days - a.days).filter(c => c.days > 0).slice(0, 10).map(c => ({ name: c.halaqa || c.name, teacher: c.name, days: c.days, avgAtt: c.avgAtt })),
+    totals: { circles: circles.length, submitted: submitted, missing: circles.length - submitted,
+      rate: circles.length ? Math.round(submitted / circles.length * 100) : 0,
+      students: students.length, declared: circles.reduce((a, c) => a + c.declared, 0),
+      photos: circles.reduce((a, c) => a + c.photos, 0), videos: circles.reduce((a, c) => a + c.videos, 0),
+      dailyLogs: daily.length, avgAtt: daily.length ? Math.round(daily.reduce((a, d) => a + d.att, 0) / daily.length) : 0, activeDaily: withDaily.length }
+  };
+}
+
+function insightsData(phone, month) {
+  const acc = account_(phone);
+  if (!acc || !acc.stats) throw new Error('E_AUTH');
+  const mp = monthParam_(month, window_());
+  const sm = monthSummary_(mp.month);
+  sm.circles = sm.circles.map(c => ({ serial: c.serial, name: c.name, halaqa: c.halaqa, district: c.district, area: c.area, submitted: c.submitted, days: c.days }));
+  delete sm.programList;
+  sm.years = mp.years;
+  sm.account = adminOut_(acc);
+  return sm;
+}
+
+const MR_ = {
+  ar: { dir: 'rtl', title: 'التقرير الشهري الشامل لحلقات القرآن الكريم', sum: 'الملخص', circles: 'الحلقات', daily: 'الإنجاز اليومي', progs: 'البرامج والأنشطة', regions: 'المناطق',
+    kT: 'عدد الحلقات', kS: 'رفعت التقرير', kM: 'لم ترفع', kR: 'نسبة الرفع %', kSt: 'الطلاب المسجلون', kD: 'الطلاب (حسب الجدول)', kPh: 'الصور', kV: 'الفيديوهات', kDl: 'أيام الإنجاز المسجلة', kAt: 'متوسط الحضور اليومي', kPr: 'البرامج والأنشطة',
+    n: 'م', teacher: 'المعلم', halaqa: 'الحلقة', jiha: 'الجهة', region: 'المنطقة', status: 'الحالة', yes: 'رفع', no: 'لم يرفع', repG: 'تاريخ التقرير', repH: 'التاريخ الهجري', stu: 'الطلاب المسجلون', dcl: 'الطلاب (الجدول)', days: 'أيام الإنجاز', avg: 'متوسط الحضور',
+    date: 'التاريخ', att: 'الحضور', newH: 'الجديد', rev: 'المراجعة', note: 'ملاحظة', type: 'النوع', ttl: 'العنوان', circ: 'الحلقة', prize: 'الجائزة', win: 'الفائزون', src: 'المصدر', prog: 'برنامج', act: 'نشاط خاص', admin: 'الإدارة العليا', tch: 'معلم', all: 'كل الحلقات',
+    pl: 'مخطط', rn: 'جارٍ', dn: 'منتهٍ', file: 'التقرير الشهري', month: 'الشهر', issued: 'تاريخ الإصدار', charts: 'الرسوم البيانية', sheikh: 'حلقات الشيخ عبد الرحمن البلاع', sup: 'بإشراف الشيخ أبي محمد', co: 'بتنفيذ شركة الأمة للخدمات الإنسانية' },
+  en: { dir: 'ltr', title: 'Comprehensive Monthly Report — Quran Circles', sum: 'Summary', circles: 'Circles', daily: 'Daily achievements', progs: 'Programs & activities', regions: 'Regions',
+    kT: 'Circles', kS: 'Submitted', kM: 'Not submitted', kR: 'Submission rate %', kSt: 'Registered students', kD: 'Students (per sheet)', kPh: 'Photos', kV: 'Videos', kDl: 'Daily logs', kAt: 'Avg daily attendance', kPr: 'Programs & activities',
+    n: '#', teacher: 'Teacher', halaqa: 'Circle', jiha: 'Organization', region: 'Region', status: 'Status', yes: 'Submitted', no: 'Not submitted', repG: 'Report date', repH: 'Hijri date', stu: 'Registered students', dcl: 'Students (sheet)', days: 'Days logged', avg: 'Avg attendance',
+    date: 'Date', att: 'Attendance', newH: 'New', rev: 'Revision', note: 'Note', type: 'Type', ttl: 'Title', circ: 'Circle', prize: 'Prize', win: 'Winners', src: 'Source', prog: 'Program', act: 'Special activity', admin: 'Top management', tch: 'Teacher', all: 'All circles',
+    pl: 'Planned', rn: 'Running', dn: 'Completed', file: 'Monthly report', month: 'Month', issued: 'Issued', charts: 'Charts', sheikh: 'Sheikh Abdulrahman Al-Balaa Circles', sup: 'Supervised by Sheikh Abu Muhammad', co: 'Implemented by Al-Ummah Company for Humanitarian Services' },
+  bn: { dir: 'ltr', title: 'কুরআন হালাকার সমন্বিত মাসিক প্রতিবেদন', sum: 'সারসংক্ষেপ', circles: 'হালাকা', daily: 'দৈনিক অর্জন', progs: 'কর্মসূচি ও কার্যক্রম', regions: 'এলাকা',
+    kT: 'হালাকা সংখ্যা', kS: 'জমা দিয়েছে', kM: 'জমা দেয়নি', kR: 'জমার হার %', kSt: 'নিবন্ধিত ছাত্র', kD: 'ছাত্র (তালিকা অনুযায়ী)', kPh: 'ছবি', kV: 'ভিডিও', kDl: 'দৈনিক এন্ট্রি', kAt: 'গড় দৈনিক উপস্থিতি', kPr: 'কর্মসূচি ও কার্যক্রম',
+    n: 'ক্র.', teacher: 'শিক্ষক', halaqa: 'হালাকা', jiha: 'প্রতিষ্ঠান', region: 'এলাকা', status: 'অবস্থা', yes: 'জমা হয়েছে', no: 'জমা হয়নি', repG: 'প্রতিবেদনের তারিখ', repH: 'হিজরি তারিখ', stu: 'নিবন্ধিত ছাত্র', dcl: 'ছাত্র (তালিকা)', days: 'লিখিত দিন', avg: 'গড় উপস্থিতি',
+    date: 'তারিখ', att: 'উপস্থিতি', newH: 'নতুন', rev: 'পুনরাবৃত্তি', note: 'মন্তব্য', type: 'ধরন', ttl: 'শিরোনাম', circ: 'হালাকা', prize: 'পুরস্কার', win: 'বিজয়ীরা', src: 'উৎস', prog: 'কর্মসূচি', act: 'বিশেষ কার্যক্রম', admin: 'উচ্চ প্রশাসন', tch: 'শিক্ষক', all: 'সব হালাকা',
+    pl: 'পরিকল্পিত', rn: 'চলমান', dn: 'সমাপ্ত', file: 'মাসিক প্রতিবেদন', month: 'মাস', issued: 'প্রকাশের তারিখ', charts: 'চার্ট', sheikh: 'শায়খ আব্দুর রহমান আল-বাল্লা হালাকা', sup: 'তত্ত্বাবধানে শায়খ আবু মুহাম্মাদ', co: 'বাস্তবায়নে আল-উম্মাহ মানবিক সেবা কোম্পানি' }
+};
+
+function monthPrograms_(sm) {
+  return sm.programList.filter(p => !p.date || p.date.indexOf(sm.month) === 0);
+}
+
+function monthlyReportExcel(phone, lang, month) {
+  exportAcc_(phone);
+  const L = MR_[lang] || MR_.ar;
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month || '')) throw new Error('E_MONTH');
+  const sm = monthSummary_(month), T = sm.totals;
+  const st = { planned: L.pl, running: L.rn, done: L.dn };
+  const sheets = [
+    { title: L.sum, header: [L.month + ': ' + month, ''], rows: [[L.kT, T.circles], [L.kS, T.submitted], [L.kM, T.missing], [L.kR, T.rate], [L.kSt, T.students], [L.kD, T.declared], [L.kPh, T.photos], [L.kV, T.videos], [L.kDl, T.dailyLogs], [L.kAt, T.avgAtt], [L.kPr, sm.programs.total]] },
+    { title: L.circles, header: [L.n, L.teacher, L.halaqa, L.jiha, L.region, L.status, L.repG, L.repH, L.stu, L.dcl, L.kPh, L.kV, L.days, L.avg],
+      rows: sm.circles.map((c, i) => [i + 1, c.name, c.halaqa, c.jiha, c.region, c.submitted ? L.yes : L.no, c.date, c.dateH, c.registered, c.declared, c.photos, c.videos, c.days, c.avgAtt]), textCols: [2, 3] },
+    { title: L.regions, header: [L.region, L.kT, L.kS, L.kSt], rows: sm.districts.map(d => [d.name, d.circles, d.submitted, d.students]) },
+    { title: L.daily, header: [L.date, L.teacher, L.halaqa, L.att, L.newH, L.rev, L.note],
+      rows: readDaily_().filter(d => d.date.indexOf(month) === 0).sort((a, b) => a.date < b.date ? -1 : 1).map(d => { const c = sm.circles.find(x => String(x.serial) === d.serial) || {}; return [d.date, c.name || '', c.halaqa || '', d.att, d.newH, d.rev, d.note]; }), textCols: [1] },
+    { title: L.progs, header: [L.type, L.ttl, L.date, L.circ, L.prize, L.win, L.status, L.src],
+      rows: monthPrograms_(sm).map(p => [p.type === 'activity' ? L.act : L.prog, p.title, p.date, p.serial === '*' ? L.all : (p.halaqa || p.teacher), p.prize, p.winners, st[p.status] || '', p.by === 'admin' ? L.admin : L.tch]) }
+  ];
+  return xlsx_(L.file + ' ' + month, sheets, L.dir === 'rtl');
+}
+
+function monthlyReportPdf(phone, lang, month, monthLabel, logoPng, charts) {
+  exportAcc_(phone);
+  const L = MR_[lang] || MR_.ar;
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month || '')) throw new Error('E_MONTH');
+  const sm = monthSummary_(month), T = sm.totals;
+  const st = { planned: L.pl, running: L.rn, done: L.dn };
+  const logo = /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(logoPng || '') && logoPng.length < 500000 ? logoPng : '';
+  const align = L.dir === 'rtl' ? 'right' : 'left';
+  const th = 'background:#123c34;color:#fff;padding:5px;border:1px solid #c9d4cc;font-size:11px';
+  const td = 'padding:4px;border:1px solid #c9d4cc;font-size:11px';
+  const kpi = (k, v, c) => '<td style="width:25%;text-align:center;border:1px solid #c9d4cc;padding:8px;background:#f4f8f5"><div style="font-size:22px;font-weight:bold;color:' + c + '">' + esc_(v) + '</div><div style="font-size:11px;color:#5d6b64">' + esc_(k) + '</div></td>';
+
+  let h = '<html dir="' + L.dir + '"><body style="font-family:Arial,sans-serif;text-align:' + align + ';color:#17251f">';
+  h += '<div style="text-align:center">' + (logo ? '<img src="' + logo + '" width="130"><br>' : '') + '<h2 style="margin:6px 0;color:#123c34">' + esc_(L.title) + '</h2><div style="font-size:12px">' + esc_(L.sheikh) + ' — ' + esc_(L.sup) + '<br>' + esc_(L.co) + '</div><h3 style="color:#c9a24a;margin:8px 0">' + esc_(monthLabel || month) + '</h3></div><hr>';
+  h += '<table style="width:100%;border-collapse:collapse"><tr>' + kpi(L.kT, T.circles, '#1d44b8') + kpi(L.kS, T.submitted, '#1a8a52') + kpi(L.kM, T.missing, '#b3261e') + kpi(L.kR, T.rate + '%', '#0d5c4b') + '</tr><tr>' +
+    kpi(L.kSt, T.students, '#1d44b8') + kpi(L.kPh, T.photos, '#1a8a52') + kpi(L.kV, T.videos, '#1a8a52') + kpi(L.kAt, T.avgAtt, '#0d5c4b') + '</tr></table>';
+  const imgs = (Array.isArray(charts) ? charts : []).filter(c => /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(c || '') && c.length < 900000).slice(0, 6);
+  if (imgs.length) {
+    h += '<h3 style="color:#123c34">' + esc_(L.charts) + '</h3><table style="width:100%"><tr>';
+    imgs.forEach((c, i) => { h += '<td style="width:50%;padding:4px;text-align:center"><img src="' + c + '" width="330"></td>'; if (i % 2 === 1 && i < imgs.length - 1) h += '</tr><tr>'; });
+    h += '</tr></table>';
+  }
+  h += '<h3 style="color:#123c34">' + esc_(L.circles) + '</h3><table style="width:100%;border-collapse:collapse"><tr>' + [L.n, L.teacher, L.halaqa, L.region, L.status, L.stu, L.days, L.avg].map(x => '<td style="' + th + '">' + esc_(x) + '</td>').join('') + '</tr>';
+  sm.circles.forEach((c, i) => {
+    h += '<tr>' + [i + 1, c.name, c.halaqa, c.region, c.submitted ? L.yes : L.no, c.registered, c.days, c.avgAtt].map((x, k) => '<td style="' + td + (k === 4 ? ';color:' + (c.submitted ? '#1a8a52' : '#b3261e') + ';font-weight:bold' : '') + '">' + esc_(x) + '</td>').join('') + '</tr>';
+  });
+  h += '</table>';
+  const pl = monthPrograms_(sm);
+  if (pl.length) {
+    h += '<h3 style="color:#123c34">' + esc_(L.progs) + '</h3><table style="width:100%;border-collapse:collapse"><tr>' + [L.type, L.ttl, L.circ, L.prize, L.win, L.status, L.src].map(x => '<td style="' + th + '">' + esc_(x) + '</td>').join('') + '</tr>';
+    pl.forEach(p => { h += '<tr>' + [p.type === 'activity' ? L.act : L.prog, p.title, p.serial === '*' ? L.all : (p.halaqa || p.teacher), p.prize, p.winners, st[p.status] || '', p.by === 'admin' ? L.admin : L.tch].map(x => '<td style="' + td + '">' + esc_(x) + '</td>').join('') + '</tr>'; });
+    h += '</table>';
+  }
+  h += '<p style="font-size:10px;color:#5d6b64;margin-top:14px">' + esc_(L.issued) + ': ' + Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm') + '</p></body></html>';
+  const pdf = Utilities.newBlob(h, 'text/html', 'report.html').getAs('application/pdf');
+  return { name: L.file + ' ' + month + '.pdf', mime: 'application/pdf', b64: Utilities.base64Encode(pdf.getBytes()) };
+}
+
 /* ================= واجهة API (تُستدعى من صفحات GitHub Pages) ================= */
 const API_ = {
   login: login, loginKey: loginKey, bootstrap: bootstrap, updateProfile: updateProfile,
@@ -1047,7 +1214,7 @@ const API_ = {
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
   usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks,
   listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
-  aboutGet: aboutGet, aboutSave: aboutSave,
+  aboutGet: aboutGet, aboutSave: aboutSave, insightsData: insightsData, monthlyReportExcel: monthlyReportExcel, monthlyReportPdf: monthlyReportPdf,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf
 };
 

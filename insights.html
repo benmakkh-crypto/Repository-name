@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>الرسوم والتحليلات</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body data-title="navInsights">
+<div class="wrap wide">
+  <header id="brand" class="brand"></header>
+  <main>
+    <nav id="topnav" class="topnav"></nav>
+    <div id="content">
+      <div class="card me"><div><h2 data-i18n="inTitle"></h2><small data-i18n="inSub"></small></div></div>
+      <div class="card"><div class="fbar">
+        <div><label class="f" for="iYear" data-i18n="year"></label><select id="iYear"></select></div>
+        <div><label class="f" for="iMonth" data-i18n="month"></label><select id="iMonth"></select></div>
+      </div></div>
+      <div id="iExport" class="card hidden">
+        <h2 data-i18n="mrTitle"></h2><p class="sub" data-i18n="mrHint"></p>
+        <div class="fbar"><div><button id="mrX" class="btn ghost" style="margin-top:0" data-i18n="mrExcel"></button></div><div><button id="mrP" class="btn" style="margin-top:0" data-i18n="mrPdf"></button></div></div>
+      </div>
+      <div id="iKpi" class="stats s4"></div>
+      <div class="cgrid">
+        <div class="card cc"><h3 data-i18n="inStatus"></h3><div id="cStatus"></div></div>
+        <div class="card cc"><h3 data-i18n="inProgs"></h3><div id="cProgSrc"></div></div>
+        <div class="card cc wide"><h3 data-i18n="inTrend"></h3><div id="cTrend"></div></div>
+        <div class="card cc"><h3 data-i18n="inMap"></h3><div id="cMap"></div><p id="mapNote" class="sub"></p></div>
+        <div class="card cc"><h3 data-i18n="inAreas"></h3><div id="cAreas"></div></div>
+        <div class="card cc"><h3 data-i18n="inJuz"></h3><div id="cJuz"></div></div>
+        <div class="card cc"><h3 data-i18n="inAge"></h3><div id="cAge"></div></div>
+        <div class="card cc wide"><h3 data-i18n="inDaily"></h3><div id="cDaily"></div></div>
+        <div class="card cc"><h3 data-i18n="inProgType"></h3><div id="cProgType"></div></div>
+        <div class="card cc"><h3 data-i18n="inTop"></h3><div id="cTop"></div></div>
+      </div>
+    </div>
+    </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js?v=2"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n2.js"></script>
+<script src="js/common.js"></script>
+<script src="js/charts.js?v=2"></script>
+<script src="js/insights.js"></script>
+</body>
+</html>
