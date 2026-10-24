@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>تقرير حلقات القرآن الكريم</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="title">
+<div class="wrap">
+  <header id="brand" class="brand"></header>
+  <main>
+    <!-- Login -->
+    <div id="setup" class="note info notice hidden" data-i18n="setupNeeded"></div>
+    <section id="v-login" class="card">
+      <h2 data-i18n="loginTitle"></h2>
+      <p class="sub" data-i18n="loginSub"></p>
+      <label class="f" for="phone" data-i18n="phoneLbl"></label>
+      <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX">
+      <button id="btnLogin" class="btn" data-i18n="loginBtn"></button>
+    </section>
+
+    <!-- Choose teacher (shared number) -->
+    <section id="v-pick" class="card hidden">
+      <h2 data-i18n="pickTitle"></h2>
+      <p class="sub" data-i18n="pickSub"></p>
+      <div id="pickList"></div>
+      <button class="btn ghost" onclick="logout()" data-i18n="back"></button>
+    </section>
+
+    
+    <!-- Teacher app -->
+    <section id="v-app" class="hidden">
+      <div class="card me">
+        <div><h2 id="tName"></h2><small id="tInfo"></small></div>
+        <button class="linkbtn" onclick="logout()" data-i18n="logout"></button>
+      </div>
+
+      <div class="tabs t4">
+        <button id="tabR" class="on" onclick="tab('r')" data-i18n="tabReport"></button>
+        <button id="tabD" onclick="tab('d')" data-i18n="tabDaily"></button>
+        <button id="tabS" onclick="tab('s')" data-i18n="tabStudents"></button>
+        <button id="tabP" onclick="tab('p')" data-i18n="tabProfile"></button>
+      </div>
+
+      <div id="paneR">
+        <div id="status" class="note"></div>
+        <div id="formBox" class="card">
+          <label class="f" for="rdate" style="margin-top:0" data-i18n="dateLbl"></label>
+          <input id="rdate" type="date">
+          <p id="rdateH" class="hd"></p>
+
+          <div class="sec"><span data-i18n="photos"></span><small data-i18n="photosHint"></small></div>
+          <div id="photoGrid" class="grid"></div>
+
+          <div class="sec"><span data-i18n="videos"></span><small data-i18n="videosHint"></small></div>
+          <div id="videoList"></div>
+
+          <label class="f" for="notes" data-i18n="notesLbl"></label>
+          <textarea id="notes" rows="3" maxlength="1000" data-ph="notesPh"></textarea>
+
+          <button id="btnSend" class="btn" data-i18n="send"></button>
+        </div>
+      </div>
+
+      <div id="paneD" class="hidden">
+        <div class="card">
+          <h2 data-i18n="dailyTitle"></h2>
+          <p class="sub" data-i18n="dailySub"></p>
+          <label class="f" for="dDate" data-i18n="dDate"></label>
+          <input id="dDate" type="date">
+          <p id="dDateH" class="hd"></p>
+          <label class="f" for="dAtt" data-i18n="dAtt"></label>
+          <input id="dAtt" type="tel" inputmode="numeric" maxlength="3">
+          <label class="f" for="dNew" data-i18n="dNew"></label>
+          <input id="dNew" type="text" maxlength="200" data-ph="dNewPh">
+          <label class="f" for="dRev" data-i18n="dRev"></label>
+          <input id="dRev" type="text" maxlength="200" data-ph="dRevPh">
+          <label class="f" for="dNote" data-i18n="dNote"></label>
+          <textarea id="dNote" rows="2" maxlength="500"></textarea>
+          <button id="btnSaveDay" class="btn" data-i18n="dSave"></button>
+        </div>
+        <h2 style="margin:18px 4px 10px" data-i18n="dRecent"></h2>
+        <div id="dList"></div>
+      </div>
+
+      <div id="paneS" class="hidden">
+        <div class="card">
+          <h2 data-i18n="stuTitle"></h2>
+          <p class="sub" id="stuCount" style="margin:0 0 4px;font-weight:700;color:var(--pri)"></p>
+          <p class="sub" style="margin:0" data-i18n="stuSub"></p>
+          <button id="btnAddStu" class="btn" data-i18n="addStudent"></button>
+        </div>
+        <div id="stuForm" class="card hidden">
+          <h2 id="stuFormTitle"></h2>
+          <label class="f" for="sName" data-i18n="stuName"></label>
+          <input id="sName" type="text">
+          <div class="row2">
+            <div><label class="f" for="sAge" data-i18n="stuAge"></label><input id="sAge" type="tel" inputmode="numeric" maxlength="2"></div>
+            <div><label class="f" for="sJuz" data-i18n="stuJuz"></label><select id="sJuz"></select></div>
+          </div>
+          <label class="f" for="sPhone" data-i18n="stuPhone"></label>
+          <input id="sPhone" type="tel" inputmode="tel">
+          <button id="btnSaveStu" class="btn" data-i18n="saveStudent"></button>
+          <button class="btn ghost" onclick="closeStuForm()" data-i18n="cancel"></button>
+        </div>
+        <div id="stuList"></div>
+      </div>
+
+      <div id="paneP" class="card hidden">
+        <h2 data-i18n="profTitle"></h2>
+        <p class="sub" data-i18n="profSub"></p>
+        <label class="f" for="pName" data-i18n="nameLbl"></label>
+        <input id="pName" type="text">
+        <label class="f" for="pPhone" data-i18n="phoneLbl"></label>
+        <input id="pPhone" type="tel" inputmode="tel">
+        <label class="f" for="pMail" data-i18n="emailLbl"></label>
+        <input id="pMail" type="email">
+        <button id="btnSave" class="btn" data-i18n="saveBtn"></button>
+      </div>
+    </section>
+  
+<div id="busy" class="overlay hidden">
+  <div class="box">
+    <b id="busyTitle"></b>
+    <div class="bar"><i id="busyBar"></i></div>
+    <div id="busyTxt" style="color:#5d6b64;font-size:14px"></div>
+    <div style="font-size:13px;color:#a63d2f;margin-top:10px" data-i18n="doNotClose"></div>
+  </div>
+</div>
+
+  </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/common.js"></script>
+<script src="js/teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>تقرير حلقات القرآن الكريم</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="tpTitle">
+<div class="wrap wide">
+  <header id="brand" class="brand"></header>
+  <main>
+    <nav id="topnav" class="topnav"></nav>
+    <div id="content">
+      <div class="card">
+        <h2 class="ptitle" data-i18n="tpTitle"></h2>
+        <p class="sub" style="margin:0" data-i18n="tpSub"></p>
+      </div>
+      <div class="stats s4">
+        <div class="stat blue"><b id="kTotal">0</b><span data-i18n="tpTotal"></span></div>
+        <div class="stat ok"><b id="kToday">0</b><span data-i18n="tpToday"></span></div>
+        <div class="stat no"><b id="kNot">0</b><span data-i18n="tpNot"></span></div>
+        <div class="stat"><b id="kDays">0</b><span data-i18n="tpDays"></span></div>
+      </div>
+      <div class="card">
+        <div class="fbar">
+          <div><label class="f" for="pYear" data-i18n="year"></label><select id="pYear"></select></div>
+          <div><label class="f" for="pMonth" data-i18n="month"></label><select id="pMonth"></select></div>
+          <div><label class="f" for="pSearch" data-i18n="search"></label><input id="pSearch" type="text" data-ph="searchPh"></div>
+        </div>
+        <div class="tabs" style="margin:16px 0 0">
+          <button id="fAll" class="on" data-i18n="fAll"></button>
+          <button id="fToday" data-i18n="fToday"></button>
+          <button id="fNot" data-i18n="fNot"></button>
+        </div>
+      </div>
+      <div id="pList"></div>
+    </div>
+  </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/common.js"></script>
+<script src="js/teachers.js"></script>
+</body>
+</html>
