@@ -33,7 +33,7 @@ async function doLogin(){
 
 async function enter(x, phone){
   const r = await api.bootstrap(x.row, phone);
-  Object.assign(S, { row:x.row, phone:phone, t:r.teacher, w:r.window, report:r.report });
+  Object.assign(S, { row:x.row, phone:phone, t:r.teacher, w:r.window, reports:r.reports || {} });
   store.set({ row:x.row, phone:phone });
   renderApp(); show('v-app'); tab('r');
 }
@@ -52,18 +52,16 @@ function renderApp(){
   renderHeader();
   $('#pName').value = x.name; $('#pPhone').value = x.phone; $('#pMail').value = x.email || '';
   buildSlots();
-  const d = $('#rdate'); d.min = w.min; d.max = w.max; d.value = (w.today >= w.min && w.today <= w.max) ? w.today : w.max;
+  const d = $('#rdate'); d.min = w.min; d.max = w.max; d.value = w.today;
   renderStatus(); updateHDate(); buildJuz(); initDaily();
 }
 
+function selMonth(){ const v = $('#rdate').value; return v ? v.slice(0, 7) : S.w.month; }
 function renderStatus(){
-  const w = S.w, st = $('#status'), fb = $('#formBox');
-  if(!w.open){
-    st.className = 'note info'; st.textContent = '🔒 ' + t('closed', w.closeDay); fb.classList.add('hidden'); return;
-  }
-  fb.classList.remove('hidden');
-  if(S.report){ st.className = 'note good'; st.textContent = t('received', monthBoth(w.month), S.report.submittedAt); }
-  else { st.className = 'note info'; st.textContent = '🗓 ' + t('openNow', monthBoth(w.month)); }
+  const st = $('#status'), m = selMonth(), rep = (S.reports || {})[m];
+  $('#formBox').classList.remove('hidden');
+  if(rep){ st.className = 'note good'; st.textContent = t('received', monthBoth(m), rep.submittedAt); }
+  else { st.className = 'note info'; st.textContent = '🗓 ' + t('openNow', monthBoth(m)); }
 }
 
 function tab(k){
@@ -138,13 +136,13 @@ async function uploadOne(it, onp){
   let last;
   for(let a = 0; a < 3; a++){
     try {
-      const s = await api.startUpload(S.row, S.phone, S.w.month, it.k, it.name, it.mime, it.blob.size, location.origin);
+      const s = await api.startUpload(S.row, S.phone, selMonth(), it.k, it.name, it.mime, it.blob.size, location.origin);
       try { await put(s.url, it.blob, onp); }
       catch(e){
         // قد يمنع المتصفح قراءة رد Drive رغم نجاح الرفع، فنتحقق من الخادم قبل اعتباره فشلاً
         await sleep(1500);
         let c = { exists:false };
-        try { c = await api.checkUpload(S.row, S.phone, S.w.month, s.name, it.blob.size); } catch(_){}
+        try { c = await api.checkUpload(S.row, S.phone, selMonth(), s.name, it.blob.size); } catch(_){}
         if(!c.exists) throw e;
       }
       return s.name;
@@ -159,7 +157,7 @@ function prog(p, txt){ $('#busyBar').style.width = Math.min(100, Math.round(p * 
 async function sendReport(){
   for(const i of PHOTOS) if(!F['photo' + i]) return toast(t('pickAllPhotos'), true);
   if(!F.video1) return toast(t('video1Req'), true);
-  const date = $('#rdate').value, ml = monthLabel(S.w.month);
+  const date = $('#rdate').value, month = date.slice(0, 7), ml = monthLabel(month);
   if(!date || date < S.w.min || date > S.w.max) return toast(t('dateRange', ml), true);
   if(!confirm(t('confirm', ml))) return;
 
@@ -183,11 +181,11 @@ async function sendReport(){
     }
     busy(true, t('saving')); prog(1, '');
     const r = await api.submitReport(S.row, S.phone, {
-      month:S.w.month, date, dateH:hijriFull(dOf(date), 'ar'), notes:$('#notes').value,
+      month, date, dateH:hijriFull(dOf(date), 'ar'), notes:$('#notes').value,
       photos:PHOTOS.map(i => stored['photo' + i]),
       videos:VIDEOS.map(i => stored['video' + i] || '')
     });
-    S.report = { submittedAt:r.submittedAt, date };
+    (S.reports = S.reports || {})[month] = { submittedAt:r.submittedAt, date };
     buildSlots(); $('#notes').value = ''; renderStatus(); window.scrollTo({ top:0, behavior:'smooth' });
     toast(t('sent'));
   } catch(e){ toast(err(e), true); }
@@ -263,8 +261,7 @@ async function delStu(s){
 const DY = { list:[] };
 
 function initDaily(){
-  const d = $('#dDate'), today = S.w.today, min = new Date(dOf(today)); min.setDate(min.getDate() - 45);
-  d.max = today; d.min = ymd(min); d.value = today; fillDaily();
+  const d = $('#dDate'); d.min = S.w.min; d.max = S.w.max; d.value = S.w.today; fillDaily();
 }
 function updateDDate(){ const v = $('#dDate').value; $('#dDateH').textContent = v ? t('hijriDate', hijriFull(dOf(v))) : ''; }
 // عند اختيار يوم سبق تسجيله تُعبّأ الحقول لتعديله
@@ -310,7 +307,7 @@ $('#btnSave').onclick = saveProfile;
 $('#btnAddStu').onclick = () => openStuForm(null);
 $('#btnSaveStu').onclick = saveStu;
 $('#btnSaveDay').onclick = saveDay;
-$('#rdate').onchange = updateHDate;
+$('#rdate').onchange = () => { updateHDate(); renderStatus(); };
 $('#dDate').onchange = fillDaily;
 applyLang();
 if(!API_URL) $('#setup').classList.remove('hidden');

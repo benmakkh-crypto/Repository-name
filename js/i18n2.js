@@ -82,6 +82,10 @@ pgByAdmin:['الإدارة العليا','Top management','উচ্চ প্�
 pgByTeacher:['معلم','Teacher','শিক্ষক'],
 pgCnt:['{0} برنامج ونشاط','{0} programs & activities','{0}টি কর্মসূচি'],
 aboutInside:['عن الحلقات: رسالتنا ورؤيتنا وأهدافنا','About the circles: our message, vision and goals','হালাকা সম্পর্কে: আমাদের বার্তা, দৃষ্টিভঙ্গি ও লক্ষ্য'],
+dateRange:['اختر تاريخاً صحيحاً للتقرير','Choose a valid report date','প্রতিবেদনের সঠিক তারিখ বাছাই করুন'],
+openNow:['يمكنك رفع تقرير شهر {0} (اختر أي تاريخ: سابق أو حالي أو قادم)','You can upload the report for {0} (any date: past, present or future)','{0} মাসের প্রতিবেদন জমা দিতে পারেন (যেকোনো তারিখ: অতীত, বর্তমান বা ভবিষ্যৎ)'],
+E_DDATE:['التاريخ غير صحيح','Invalid date','তারিখ সঠিক নয়'],
+E_DATE:['تاريخ التقرير غير صحيح','Invalid report date','প্রতিবেদনের তারিখ সঠিক নয়'],
 /* ملف المعلم */
 fileTitle:['ملف الحلقة','Circle file','হালাকার ফাইল'],
 fileSub:['صور ومقاطع كل التقارير الشهرية للحلقة في ملف واحد.','Photos and videos of all monthly reports in one file.','সব মাসিক প্রতিবেদনের ছবি ও ভিডিও এক ফাইলে।'],

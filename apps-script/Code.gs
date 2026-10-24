@@ -13,7 +13,7 @@ const CONFIG = {
   STUDENTS_SHEET: 'الطلاب',    // ورقة تُنشأ تلقائياً لبيانات الطلاب
   DAILY_SHEET: 'الإنجاز اليومي', // ورقة تُنشأ تلقائياً للإنجازات اليومية
   CLOSE_DAY: 29,               // الرفع مفتوح من يوم 1 إلى يوم 29 من كل شهر (لتقرير الشهر الحالي)، ثم يُقفل ويفتح للشهر الجديد يوم 1
-  START_YEAR: 2026,            // أول سنة في لوحة الإدارة
+  START_YEAR: 2024,            // أول سنة في لوحة الإدارة
   YEARS_AHEAD: 10,             // ولوحة الإدارة تعرض حتى 10 سنوات قادمة (يتجدد تلقائياً كل سنة)
   TEST_MODE: false,            // true = الرفع مفتوح دائماً (للتجربة فقط)
   PHOTOS_COUNT: 5,
@@ -120,19 +120,26 @@ function auth_(row, phone) {
 function window_() {
   const now = new Date();
   const f = p => +Utilities.formatDate(now, CONFIG.TZ, p);
-  const y = f('yyyy'), m = f('M'), d = f('d');
+  const y = f('yyyy'), m = f('M');
   const p2 = n => ('0' + n).slice(-2);
-  const last = new Date(y, m, 0).getDate();
   return {
-    open: CONFIG.TEST_MODE || d <= CONFIG.CLOSE_DAY,
+    open: true,                                   // التسجيل مفتوح لكل الشهور: السابقة والحالية والقادمة
     month: y + '-' + p2(m),
     label: MONTHS_AR[m - 1] + ' ' + y,
-    min: y + '-' + p2(m) + '-01',
-    max: y + '-' + p2(m) + '-' + p2(last),
+    min: CONFIG.START_YEAR + '-01-01',
+    max: (y + CONFIG.YEARS_AHEAD) + '-12-31',
     today: Utilities.formatDate(now, CONFIG.TZ, 'yyyy-MM-dd'),
-    closeDay: CONFIG.CLOSE_DAY,
     photos: CONFIG.PHOTOS_COUNT
   };
+}
+
+function dateOk_(d) {
+  const w = window_();
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(d || '')) && d >= w.min && d <= w.max && new Date(d + 'T00:00:00Z').toISOString().slice(0, 10) === d;
+}
+function monthOk_(m) {
+  const w = window_();
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(m || '')) && m >= w.min.slice(0, 7) && m <= w.max.slice(0, 7);
 }
 
 /* ================= ورقة التقارير ================= */
@@ -232,12 +239,9 @@ function loginKey(key) {
 function bootstrap(row, phone) {
   const a = auth_(row, phone);
   const w = window_();
-  const rep = findReport_(reportsSheet_(), a.t.serial, w.month);
-  return {
-    teacher: pub_(a.t),
-    window: w,
-    report: rep ? { date: String(rep.vals[2]), submittedAt: String(rep.vals[0]), count: rep.vals[19] } : null
-  };
+  const reports = {};
+  reportsSheet_().getDataRange().getValues().slice(1).forEach(r => { if (String(r[3]) === String(a.t.serial)) reports[String(r[1])] = { date: String(r[2]), submittedAt: String(r[0]), count: r[19] }; });
+  return { teacher: pub_(a.t), window: w, reports: reports };
 }
 
 function updateProfile(row, phone, data) {
@@ -275,9 +279,7 @@ function teacherFolder_(t, month) {
  */
 function startUpload(row, phone, month, kind, fileName, mime, size, origin) {
   const a = auth_(row, phone);
-  const w = window_();
-  if (!w.open) throw new Error('E_CLOSED');
-  if (month !== w.month) throw new Error('E_MONTH');
+  if (!monthOk_(month)) throw new Error('E_MONTH');
   const m = /^(photo|video)([1-5])$/.exec(kind);
   if (!m) throw new Error('E_KIND');
   const isPhoto = m[1] === 'photo';
@@ -323,10 +325,9 @@ function checkUpload(row, phone, month, name, size) {
 /** حفظ التقرير بعد اكتمال رفع كل الملفات */
 function submitReport(row, phone, data) {
   const a = auth_(row, phone);
-  const w = window_();
-  if (!w.open) throw new Error('E_CLOSED');
-  if (data.month !== w.month) throw new Error('E_MONTH');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date) || data.date.indexOf(w.month) !== 0) throw new Error('E_DATE');
+  if (!dateOk_(data.date)) throw new Error('E_DATE');
+  const month = data.date.slice(0, 7);
+  if (data.month && data.month !== month) throw new Error('E_MONTH');
 
   const safe = n => !n || /^(photo|video)[1-5]_\d+_\d+\.[a-z0-9]{2,5}$/.test(n);
   const photos = (data.photos || []).slice(0, CONFIG.PHOTOS_COUNT);
@@ -335,7 +336,7 @@ function submitReport(row, phone, data) {
   if (!videos[0]) throw new Error('E_VIDEO1');
   if (!photos.concat(videos).every(safe)) throw new Error('E_BAD');
 
-  const folder = teacherFolder_(a.t, w.month);
+  const folder = teacherFolder_(a.t, month);
   const link = n => {
     if (!n) return '';
     const it = folder.getFilesByName(n);
@@ -350,9 +351,9 @@ function submitReport(row, phone, data) {
   lock.waitLock(30000);
   try {
     const sh = reportsSheet_();
-    const old = findReport_(sh, a.t.serial, w.month);
+    const old = findReport_(sh, a.t.serial, month);
     const now = Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm');
-    const rowVals = [now, w.month, data.date, a.t.serial, a.t.name, a.t.phone, a.t.halaqa, a.t.jiha, a.t.region]
+    const rowVals = [now, month, data.date, a.t.serial, a.t.name, a.t.phone, a.t.halaqa, a.t.jiha, a.t.region]
       .concat(urls, [clean_(data.notes).slice(0, 1000), folder.getUrl(), old ? (Number(old.vals[19]) || 1) + 1 : 1, clean_(data.dateH).slice(0, 60)]);
     if (old) { sh.getRange(old.row, 21).setNumberFormat('@'); sh.getRange(old.row, 1, 1, rowVals.length).setValues([rowVals]); }
     else { const r = sh.getLastRow() + 1; sh.getRange(r, 2, 1, 2).setNumberFormat('@'); sh.getRange(r, 21).setNumberFormat('@'); sh.getRange(r, 1, 1, rowVals.length).setValues([rowVals]); }
@@ -665,7 +666,7 @@ const byDateDesc_ = (a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
 
 function listDaily(row, phone) {
   const a = auth_(row, phone);
-  return { entries: readDaily_().filter(d => d.serial === String(a.t.serial)).sort(byDateDesc_).slice(0, 40).map(pubDaily_) };
+  return { entries: readDaily_().filter(d => d.serial === String(a.t.serial)).sort(byDateDesc_).slice(0, 400).map(pubDaily_) };
 }
 
 /** تسجيل/تعديل إنجاز يوم (يوم واحد لكل معلم؛ إعادة التسجيل لنفس التاريخ تستبدل السابق) */
@@ -673,9 +674,7 @@ function saveDaily(row, phone, d) {
   const a = auth_(row, phone);
   const date = String(d.date || '');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('E_DDATE');
-  const today = Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd');
-  const min = Utilities.formatDate(new Date(Date.now() - 45 * 86400000), CONFIG.TZ, 'yyyy-MM-dd');
-  if (date > today || date < min) throw new Error('E_DDATE');
+  if (!dateOk_(date)) throw new Error('E_DDATE');
   const att = Number(d.att);
   if (!Number.isInteger(att) || att < 0 || att > 500) throw new Error('E_DATT');
   const newH = clean_(d.newH).slice(0, 200), rev = clean_(d.rev).slice(0, 200), note = clean_(d.note).slice(0, 500);
