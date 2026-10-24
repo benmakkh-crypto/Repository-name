@@ -180,3 +180,25 @@ function progCard(p, withCircle){
   if(p.winners){ const x = document.createElement('div'); x.className = 'meta'; x.textContent = t('pgWinLbl', p.winners); d.appendChild(x); }
   return d;
 }
+
+
+/* ---------- تطبيق الجوال (PWA): تسجيل عامل الخدمة وزر التثبيت ---------- */
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+let installEv = null;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; showInstall(); });
+window.addEventListener('appinstalled', () => { const b = $('#installBar'); if(b) b.remove(); });
+function showInstall(){
+  if(isStandalone() || lsGet('hq_noinstall') === '1' || $('#installBar')) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(!installEv && !ios) return;
+  const b = document.createElement('div'); b.id = 'installBar';
+  b.innerHTML = '<span class="ic">📲</span><div><b></b><small></small></div><button class="go"></button><button class="x" aria-label="x">✕</button>';
+  b.querySelector('b').textContent = t('installTitle');
+  b.querySelector('small').textContent = installEv ? t('installSub') : t('installIos');
+  const go = b.querySelector('.go'); go.textContent = t('installBtn'); if(!installEv) go.classList.add('hidden');
+  go.onclick = async () => { if(!installEv) return; installEv.prompt(); await installEv.userChoice; installEv = null; b.remove(); };
+  b.querySelector('.x').onclick = () => { lsSet('hq_noinstall', '1'); b.remove(); };
+  document.body.appendChild(b);
+}
+window.addEventListener('load', () => setTimeout(showInstall, 1500));

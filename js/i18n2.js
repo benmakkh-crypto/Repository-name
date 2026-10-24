@@ -90,6 +90,10 @@ kpiReport:['تقرير هذا الشهر','This month\'s report','এ মাস�
 kpiDays:['أيام الإنجاز هذا الشهر','Days logged this month','এ মাসে লিখিত দিন'],
 kpiProgs:['البرامج والأنشطة','Programs & activities','কর্মসূচি ও কার্যক্রম'],
 aboutLink:['تعرّف على حلقات القرآن الكريم','Learn about the Quran circles','কুরআন হালাকা সম্পর্কে জানুন'],
+installTitle:['ثبّت التطبيق على جوالك','Install the app on your phone','আপনার ফোনে অ্যাপ ইনস্টল করুন'],
+installSub:['يفتح مباشرة من شاشة الجوال كأي تطبيق','Opens straight from your home screen like any app','অন্য অ্যাপের মতো সরাসরি হোম স্ক্রিন থেকে খুলবে'],
+installIos:['اضغط زر المشاركة ⬆️ ثم «إضافة إلى الشاشة الرئيسية»','Tap Share ⬆️ then "Add to Home Screen"','শেয়ার ⬆️ চেপে "Add to Home Screen" বাছাই করুন'],
+installBtn:['تثبيت','Install','ইনস্টল'],
 /* ملف المعلم */
 fileTitle:['ملف الحلقة','Circle file','হালাকার ফাইল'],
 fileSub:['صور ومقاطع كل التقارير الشهرية للحلقة في ملف واحد.','Photos and videos of all monthly reports in one file.','সব মাসিক প্রতিবেদনের ছবি ও ভিডিও এক ফাইলে।'],
