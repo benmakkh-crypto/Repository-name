@@ -106,6 +106,7 @@ function renderNav(active, acc){
   if(acc.stats) items.push(['insights.html', 'navInsights', 'insights']);
   if(acc.contacts) items.push(['teachers.html', 'navTeachers', 'teachers']);
   if(acc.stats || acc.media || acc.manage) items.push(['programs.html', 'navPrograms', 'programs']);
+  if(acc.media) items.push(['links.html', 'navLinks', 'links']);
   if(acc.manage) items.push(['manage.html', 'navManage', 'manage']);
   items.push(['about.html', 'navAbout', 'about']);
   const nav = $('#topnav'); nav.innerHTML = '';

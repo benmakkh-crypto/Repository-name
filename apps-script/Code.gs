@@ -281,10 +281,19 @@ function sub_(parent, name) {
   return it.hasNext() ? it.next() : parent.createFolder(name);
 }
 
-function teacherFolder_(t, month) {
+function rootFolder_() {
   const it = DriveApp.getFoldersByName(CONFIG.ROOT_FOLDER_NAME);
-  const root = it.hasNext() ? it.next() : DriveApp.createFolder(CONFIG.ROOT_FOLDER_NAME);
-  return sub_(sub_(root, month), t.serial + ' - ' + t.name.replace(/[\/\\]/g, ' '));
+  return it.hasNext() ? it.next() : DriveApp.createFolder(CONFIG.ROOT_FOLDER_NAME);
+}
+
+/** مجلد المعلم الخاص: الجذر / ملفات المعلمين / «التسلسل - الاسم» (فيه مجلد لكل شهر) */
+function teacherHome_(t) {
+  return sub_(sub_(rootFolder_(), CONFIG.PERSONAL_FOLDER), t.serial + ' - ' + t.name.replace(/[\/\\]/g, ' '));
+}
+
+/** مجلد شهر المعلم: صور وفيديوهات الشهر + ملف تقريره */
+function teacherFolder_(t, month) {
+  return sub_(teacherHome_(t), month);
 }
 
 /**
@@ -372,6 +381,13 @@ function submitReport(row, phone, data) {
     if (old) { sh.getRange(old.row, 21).setNumberFormat('@'); sh.getRange(old.row, 1, 1, rowVals.length).setValues([rowVals]); }
     else { const r = sh.getLastRow() + 1; sh.getRange(r, 2, 1, 2).setNumberFormat('@'); sh.getRange(r, 21).setNumberFormat('@'); sh.getRange(r, 1, 1, rowVals.length).setValues([rowVals]); }
   } finally { lock.releaseLock(); }
+  try { // ملف تقرير نصي منفصل للمعلم داخل مجلد الشهر
+    const nm = 'تقرير-' + month + '.txt';
+    const old2 = folder.getFilesByName(nm); while (old2.hasNext()) old2.next().setTrashed(true);
+    folder.createFile(nm, ['تقرير شهر ' + month, 'المعلم: ' + a.t.name, 'الحلقة: ' + a.t.halaqa, 'الجهة: ' + a.t.jiha + ' — ' + a.t.region,
+      'تاريخ التقرير: ' + data.date + (data.dateH ? ' (' + clean_(data.dateH) + ')' : ''), 'الصور: ' + photos.length + ' | الفيديوهات: ' + videos.filter(Boolean).length,
+      'ملاحظات: ' + clean_(data.notes).slice(0, 1000)].join('\n'), MimeType.PLAIN_TEXT);
+  } catch (e) {}
   return { ok: true, submittedAt: Utilities.formatDate(new Date(), CONFIG.TZ, 'yyyy-MM-dd HH:mm') };
 }
 
@@ -851,19 +867,9 @@ function teacherAdd(phone, d) {
 }
 
 /* ================= ملف خاص لكل معلم (Drive + صفحة) ================= */
-function personalFolder_(t, reps) {
-  const rit = DriveApp.getFoldersByName(CONFIG.ROOT_FOLDER_NAME);
-  const root = rit.hasNext() ? rit.next() : DriveApp.createFolder(CONFIG.ROOT_FOLDER_NAME);
-  const f = sub_(sub_(root, CONFIG.PERSONAL_FOLDER), t.serial + ' - ' + t.name.replace(/[\/\\]/g, ' '));
+function personalFolder_(t) {
+  const f = teacherHome_(t);
   try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
-  try {
-    const have = {};
-    const it = f.getFiles(); while (it.hasNext()) have[it.next().getName()] = true;
-    reps.forEach(r => {
-      const id = idOf_(r.folder);
-      if (id && !have[r.month]) { try { f.createShortcut(id).setName(r.month); } catch (e) {} }
-    });
-  } catch (e) {}
   return f.getUrl();
 }
 
@@ -878,7 +884,7 @@ function fileData_(t) {
   }
   reps.sort((a, b) => a.month < b.month ? 1 : -1);
   let link = '';
-  try { link = personalFolder_(t, reps); } catch (e) {}
+  try { link = personalFolder_(t); } catch (e) {}
   return { teacher: { serial: t.serial, name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region }, folderUrl: link,
     reports: reps.map(r => ({ month: r.month, date: r.date, dateH: r.dateH, notes: r.notes, photos: r.photos, videos: r.videos })),
     totals: { reports: reps.length, photos: reps.reduce((n, r) => n + r.photos.length, 0), videos: reps.reduce((n, r) => n + r.videos.length, 0) } };
@@ -918,7 +924,28 @@ function emailLinks(phone, serials, siteUrl) {
 }
 
 /** تشغيل مرة واحدة من المحرر لمنح صلاحية إرسال البريد */
-function authorize() { return MailApp.getRemainingDailyQuota(); }
+function authorize() {
+  DriveApp.getRootFolder();
+  ScriptApp.getOAuthToken();
+  UrlFetchApp.getRequest('https://www.googleapis.com/drive/v3/about');
+  SpreadsheetApp.getActiveSpreadsheet();
+  return MailApp.getRemainingDailyQuota();
+}
+
+/** روابط المشاركة: رابط Drive العام + رابط مجلد كل حلقة + رابط صفحة الحلقة (لمن له صلاحية الوسائط) */
+function shareLinks(phone, siteUrl) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const site = /^https:\/\//.test(String(siteUrl || '')) ? String(siteUrl).replace(/[^\/]*$/, '') : '';
+  const root = rootFolder_();
+  try { root.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  const list = teachersInfo_().list.map(t => {
+    let url = '';
+    try { url = personalFolder_(t); } catch (e) {}
+    return { serial: t.serial, name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region, folder: url, page: site ? site + 'file.html?s=' + t.serial : '' };
+  });
+  return { root: root.getUrl(), teachers: list };
+}
 
 /* ================= البرامج والأنشطة والجوائز ================= */
 const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل', 'المصدر'];
@@ -1225,7 +1252,7 @@ const API_ = {
   listStudents: listStudents, saveStudent: saveStudent, deleteStudent: deleteStudent,
   listDaily: listDaily, saveDaily: saveDaily, deleteDaily: deleteDaily,
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
-  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks,
+  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks,
   listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
   aboutGet: aboutGet, aboutSave: aboutSave, insightsData: insightsData, monthlyReportExcel: monthlyReportExcel, monthlyReportPdf: monthlyReportPdf,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf
