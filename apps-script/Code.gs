@@ -925,7 +925,7 @@ function emailLinks(phone, serials, siteUrl) {
 
 /** تشغيل مرة واحدة من المحرر لمنح صلاحية إرسال البريد */
 function authorize() {
-  DriveApp.getRootFolder();
+  const f = rootFolder_(); f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); // يتطلب صلاحية Drive الكاملة
   ScriptApp.getOAuthToken();
   UrlFetchApp.getRequest('https://www.googleapis.com/drive/v3/about');
   SpreadsheetApp.getActiveSpreadsheet();
