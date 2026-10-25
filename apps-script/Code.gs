@@ -1246,7 +1246,7 @@ function doPost(e) {
     const m = String(err && err.message || err);
     if (/^E_[A-Z0-9]+/.test(m)) return json_({ ok: false, error: m });
     console.error(m);
-    return json_({ ok: false, error: 'E_SERVER' });
+    return json_({ ok: false, error: 'E_SERVER', detail: m.slice(0, 160) });
   }
 }
 
