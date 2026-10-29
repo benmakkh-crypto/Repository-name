@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d5c4b">
+<title>بوابة الجهة الداعمة — حلقات القرآن الكريم</title>
+<link rel="icon" href="assets/logo.webp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حلقات القرآن">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body data-title="pbTitle">
+<div class="wrap wide">
+  <header id="brand" class="brand"></header>
+  <main>
+    <section class="card" id="hero" style="text-align:center">
+      <h2 class="ptitle" data-i18n="pbTitle"></h2>
+      <p class="sub" style="margin:0" id="pbWho"></p>
+    </section>
+    <div class="stats s4">
+      <div class="stat ok"><b id="kUp">0</b><span data-i18n="pbUploaded"></span></div>
+      <div class="stat no"><b id="kMiss">0</b><span data-i18n="pbMissing"></span></div>
+      <div class="stat blue"><b id="kPh">0</b><span data-i18n="photos"></span></div>
+      <div class="stat"><b id="kVi">0</b><span data-i18n="videos"></span></div>
+    </div>
+    <div class="card">
+      <label class="f" data-i18n="month"></label>
+      <div id="pbMonths" class="tabs" style="margin:6px 0 14px;flex-wrap:wrap"></div>
+      <div class="fbar"><input id="pbSearch" type="text" data-ph="searchPh"></div>
+      <div class="tabs" style="margin:14px 0 0">
+        <button id="fAll" class="on" data-i18n="fAll"></button>
+        <button id="fDone" data-i18n="pbOnlyDone"></button>
+        <button id="fMiss" data-i18n="pbOnlyMiss"></button>
+      </div>
+    </div>
+    <div id="dList"></div>
+    <div id="lb" class="lb hidden">
+      <a id="lbOpen" target="_blank" rel="noopener" onclick="event.stopPropagation()" data-i18n="openFull"></a>
+      <button class="nv pv" id="lbPrev" aria-label="prev">❮</button>
+      <img id="lbImg" alt="">
+      <button class="nv nx" id="lbNext" aria-label="next">❯</button>
+      <div class="cnt" id="lbN"></div>
+    </div>
+  </main>
+  <footer class="ft" data-i18n="brandCo"></footer>
+</div>
+<div id="toast" class="hidden"></div>
+<script src="js/config.js?v=2"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n2.js?v=10"></script>
+<script src="js/common.js"></script>
+<script src="js/portal.js"></script>
+</body>
+</html>

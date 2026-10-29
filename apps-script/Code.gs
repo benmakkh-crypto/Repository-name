@@ -1012,6 +1012,31 @@ function teacherLink(phone, serial, month) {
   return { url: home.getUrl() };
 }
 
+/** بوابة الداعم: كل حلقات شهر واحد (حالة الرفع + صور + فيديوهات) في استدعاء واحد */
+function portalData(phone, month) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const d = new Date(), months = [];
+  for (let k = -1; k < 11; k++) months.push(Utilities.formatDate(new Date(d.getFullYear(), d.getMonth() + k, 1), CONFIG.TZ, 'yyyy-MM'));
+  const m = months.indexOf(month) > -1 ? month : months[0];
+  const v = reportsSheet_().getDataRange().getValues();
+  const by = {}, count = {};
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i], mm = String(r[1]), sr = String(r[3]);
+    if ([9, 10, 11, 12, 13].some(k => r[k])) count[mm] = (count[mm] || 0) + 1;
+    if (mm !== m) continue;
+    by[sr] = { date: String(r[2]), dateH: String(r[20] || ''), notes: String(r[17] || ''),
+      photos: [9, 10, 11, 12, 13].map(k => idOf_(r[k])).filter(Boolean), videos: [14, 15, 16].map(k => idOf_(r[k])).filter(Boolean) };
+  }
+  const circles = teachersInfo_().list.map(t => {
+    const x = by[String(t.serial)];
+    return { serial: String(t.serial), name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region, done: !!x, date: x ? x.date : '', dateH: x ? x.dateH : '', notes: x ? x.notes : '', photos: x ? x.photos : [], videos: x ? x.videos : [] };
+  });
+  const total = circles.length, up = circles.filter(c => c.done).length;
+  return { account: { name: acc.name, role: acc.role }, months: months, counts: count, month: m, total: total, uploaded: up,
+    photos: circles.reduce((n, c) => n + c.photos.length, 0), videos: circles.reduce((n, c) => n + c.videos.length, 0), circles: circles };
+}
+
 /* ================= البرامج والأنشطة والجوائز ================= */
 const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل', 'المصدر'];
 
@@ -1317,7 +1342,7 @@ const API_ = {
   listStudents: listStudents, saveStudent: saveStudent, deleteStudent: deleteStudent,
   listDaily: listDaily, saveDaily: saveDaily, deleteDaily: deleteDaily,
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
-  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks, monthShare: monthShare, shareInit: shareInit, rootLink: rootLink, teacherLink: teacherLink,
+  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks, monthShare: monthShare, shareInit: shareInit, portalData: portalData, rootLink: rootLink, teacherLink: teacherLink,
   listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
   aboutGet: aboutGet, aboutSave: aboutSave, insightsData: insightsData, monthlyReportExcel: monthlyReportExcel, monthlyReportPdf: monthlyReportPdf,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf

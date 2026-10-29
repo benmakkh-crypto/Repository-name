@@ -49,9 +49,29 @@ function render(){
   });
 }
 
+/* بوابة الداعم: رابط دائم لكل جهة داعمة (حساب بصلاحية «جهة داعمة») */
+const portalLink = u => location.href.replace(/[^\/]*$/, '') + 'report.html?k=' + u.key;
+async function loadSupporters(g){
+  const box = $('#spList'); box.innerHTML = '';
+  if(!g.acc.manage){ $('#spAdd').parentNode.classList.add('hidden'); return; }
+  let us = []; try { us = (await api.usersList(g.phone)).filter(u => u.role === 'donor' && u.active); } catch(e){ toast(err(e), true); }
+  if(!us.length){ const p = document.createElement('p'); p.className = 'sub'; p.textContent = t('spNone'); box.appendChild(p); }
+  us.forEach(u => {
+    const row = document.createElement('div'); row.className = 'fbar'; row.style.marginBottom = '8px';
+    const n = document.createElement('b'); n.textContent = u.name; n.style.flex = '1'; row.appendChild(n);
+    const b = document.createElement('button'); b.className = 'btn'; b.textContent = '🔗 ' + t('spCopy'); b.onclick = () => copyText(portalLink(u), t('spCopied')); row.appendChild(b);
+    box.appendChild(row);
+  });
+}
+
 (async () => {
   const g = await adminGuard('links', 'media'); if(!g) return;
-  LK.phone = g.phone;
+  LK.phone = g.phone; loadSupporters(g);
+  $('#spAdd').onclick = async () => {
+    const nm = $('#spName').value.trim(); if(nm.length < 2) return;
+    const code = '9' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
+    try { await api.userSave(g.phone, { phone: code, name: nm, role: 'donor' }); $('#spName').value = ''; await loadSupporters(g); toast(t('spCreated')); } catch(e){ toast(err(e), true); }
+  };
   try { LK.data = await api.shareInit(g.phone); }
   catch(e){ toast(err(e), true); return; }
   LK.month = LK.data.months[0];
