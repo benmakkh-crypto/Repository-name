@@ -32,12 +32,14 @@
       <div class="card">
         <h3 data-i18n="lkMonths"></h3>
         <p class="sub" data-i18n="lkMonthsSub"></p>
-        <div id="lkMonths" class="fbar"></div>
+        <div id="lkMonths" class="cgrid"></div>
+        <div class="fbar" style="margin-top:14px"><button id="lkRootCopy" class="btn ghost" data-i18n="lkRoot"></button></div>
       </div>
       <div class="card">
-        <label class="f" data-i18n="lkRoot"></label>
-        <div class="fbar"><input id="lkRootUrl" type="text" readonly dir="ltr"><button id="lkRootCopy" class="btn" data-i18n="lkCopy"></button></div>
-        <div class="fbar" style="margin-top:12px"><input id="lkSearch" type="text" data-ph="searchPh"></div>
+        <div class="fbar">
+          <div><label class="f" for="lkMonth" data-i18n="month"></label><select id="lkMonth"></select></div>
+          <div><label class="f" for="lkSearch" data-i18n="search"></label><input id="lkSearch" type="text" data-ph="searchPh"></div>
+        </div>
       </div>
       <div id="lkList"></div>
     </div>
@@ -47,7 +49,7 @@
 <div id="toast" class="hidden"></div>
 <script src="js/config.js?v=2"></script>
 <script src="js/i18n.js"></script>
-<script src="js/i18n2.js?v=8"></script>
+<script src="js/i18n2.js?v=9"></script>
 <script src="js/common.js"></script>
 <script src="js/links.js"></script>
 </body>

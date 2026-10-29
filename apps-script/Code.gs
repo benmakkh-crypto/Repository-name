@@ -975,14 +975,41 @@ function monthShare(phone, month) {
   return { month: month, url: mf.getUrl(), count: n };
 }
 
-/** الأشهر المتاحة للمشاركة تلقائياً: 12 شهراً تبدأ من الشهر الماضي */
-function shareMonths(phone) {
+/** بيانات صفحة الروابط (سريعة: من الجداول فقط): 12 شهراً من الشهر الماضي + حالة رفع كل حلقة */
+function shareInit(phone) {
   const acc = account_(phone);
   if (!acc || !acc.media) throw new Error('E_AUTH');
-  const d = new Date(), list = [];
-  for (let k = -1; k < 11; k++) list.push(Utilities.formatDate(new Date(d.getFullYear(), d.getMonth() + k, 1), CONFIG.TZ, 'yyyy-MM'));
-  const top = sub_(rootFolder_(), 'حسب الشهر'); list.forEach(m => sub_(top, m)); // مجلد لكل شهر ظاهر في الرابط الرئيسي
-  return list;
+  const d = new Date(), months = [];
+  for (let k = -1; k < 11; k++) months.push(Utilities.formatDate(new Date(d.getFullYear(), d.getMonth() + k, 1), CONFIG.TZ, 'yyyy-MM'));
+  const done = {};
+  const v = reportsSheet_().getDataRange().getValues();
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i];
+    const p = [9, 10, 11, 12, 13].filter(k => r[k]).length, vd = [14, 15, 16].filter(k => r[k]).length;
+    (done[String(r[3])] = done[String(r[3])] || {})[String(r[1])] = { p: p, v: vd };
+  }
+  return { months: months, teachers: teachersInfo_().list.map(t => ({ serial: t.serial, name: t.name, halaqa: t.halaqa, jiha: t.jiha, region: t.region, done: done[String(t.serial)] || {} })) };
+}
+
+/** رابط Drive الرئيسي (مجلد «حسب الشهر») */
+function rootLink(phone) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const root = sub_(rootFolder_(), 'حسب الشهر');
+  try { root.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  return { url: root.getUrl() };
+}
+
+/** رابط حلقة واحدة: مجلد شهرها إن وُجد (month) وإلا مجلدها الكامل */
+function teacherLink(phone, serial, month) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const t = teachersInfo_().list.find(x => String(x.serial) === String(serial));
+  if (!t) throw new Error('E_NOTFOUND');
+  const home = teacherHome_(t);
+  try { home.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  if (/^\d{4}-\d{2}$/.test(month || '')) { const q = home.getFoldersByName(month); if (q.hasNext()) return { url: q.next().getUrl(), month: month }; return { url: '', month: month }; }
+  return { url: home.getUrl() };
 }
 
 /* ================= البرامج والأنشطة والجوائز ================= */
@@ -1290,7 +1317,7 @@ const API_ = {
   listStudents: listStudents, saveStudent: saveStudent, deleteStudent: deleteStudent,
   listDaily: listDaily, saveDaily: saveDaily, deleteDaily: deleteDaily,
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
-  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks, monthShare: monthShare, shareMonths: shareMonths,
+  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks, monthShare: monthShare, shareInit: shareInit, rootLink: rootLink, teacherLink: teacherLink,
   listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
   aboutGet: aboutGet, aboutSave: aboutSave, insightsData: insightsData, monthlyReportExcel: monthlyReportExcel, monthlyReportPdf: monthlyReportPdf,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf
