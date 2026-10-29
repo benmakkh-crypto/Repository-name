@@ -46,7 +46,7 @@ userToggle:['إيقاف / تفعيل','Disable / enable','বন্ধ / চা�
 navLinks:['روابط الحلقات','Circle links','হালাকার লিংক'],
 lkTitle:['روابط الحلقات والتوثيق','Circle & documentation links','হালাকা ও ডকুমেন্টেশন লিংক'],
 lkSub:['انسخ رابط Drive العام أو الرابط الخاص بكل حلقة (صور وفيديوهات تقاريرها) وأرسله للجهة الداعمة.','Copy the general Drive link or each circle\'s own link (photos & videos of its reports) and send it to the supporting organization.','সাধারণ ড্রাইভ লিংক বা প্রতিটি হালাকার নিজস্ব লিংক (প্রতিবেদনের ছবি ও ভিডিও) কপি করে সহায়ক প্রতিষ্ঠানকে পাঠান।'],
-lkRoot:['رابط Drive العام لكل الحلقات','General Drive link for all circles','সব হালাকার সাধারণ ড্রাইভ লিংক'],
+lkRoot:['رابط Drive الرئيسي (مجلدات الأشهر: شهر بشهر)','Main Drive link (month-by-month folders)','প্রধান ড্রাইভ লিংক (মাস অনুযায়ী ফোল্ডার)'],
 lkMonths:['رابط الجهة الداعمة حسب الشهر','Supporter link by month','মাস অনুযায়ী সহায়ক লিংক'],
 lkMonthsSub:['اضغط على الشهر لنسخ رابط Drive واحد يضم مجلدات كل الحلقات لذلك الشهر بصورها وفيديوهاتها، وأرسله للجهة الداعمة.','Tap a month to copy one Drive link holding every circle\'s folder for that month (photos & videos), then send it to the supporter.','মাস চাপুন: সেই মাসের সব হালাকার ফোল্ডারসহ একটি ড্রাইভ লিংক কপি হবে, সহায়ককে পাঠান।'],
 lkWait:['جارٍ التجهيز…','Preparing…','প্রস্তুত হচ্ছে…'],

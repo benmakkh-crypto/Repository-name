@@ -937,7 +937,7 @@ function shareLinks(phone, siteUrl) {
   const acc = account_(phone);
   if (!acc || !acc.media) throw new Error('E_AUTH');
   const site = /^https:\/\//.test(String(siteUrl || '')) ? String(siteUrl).replace(/[^\/]*$/, '') : '';
-  const root = rootFolder_();
+  const root = sub_(rootFolder_(), 'حسب الشهر'); // الرابط العام يفتح على مجلد الأشهر (شهر بشهر)
   try { root.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
   const list = teachersInfo_().list.map(t => {
     let url = '';
@@ -984,7 +984,9 @@ function shareMonths(phone) {
   for (let i = 1; i < v.length; i++) { const m = String(v[i][1]); if (/^\d{4}-\d{2}$/.test(m)) set[m] = 1; }
   const d = new Date();
   for (let k = 0; k < 3; k++) { const x = new Date(d.getFullYear(), d.getMonth() + k, 1); set[Utilities.formatDate(x, CONFIG.TZ, 'yyyy-MM')] = 1; }
-  return Object.keys(set).sort();
+  const list = Object.keys(set).sort();
+  const top = sub_(rootFolder_(), 'حسب الشهر'); list.forEach(m => sub_(top, m)); // مجلد لكل شهر ظاهر في الرابط العام
+  return list;
 }
 
 /* ================= البرامج والأنشطة والجوائز ================= */
