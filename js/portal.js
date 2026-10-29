@@ -7,6 +7,7 @@ window.onLangChange = () => { if(P.data) render(); };
 applyLang();
 
 async function load(month){
+  if(month && month !== P.month) P.filter = 'all'; // عند اختيار شهر تظهر كل الحلقات بصورها ومقاطعها
   try { P.data = await api.portalData(P.phone, month || P.month || ''); P.month = P.data.month; render(); }
   catch(e){ toast(err(e), true); }
 }
@@ -38,6 +39,7 @@ function renderList(){
   const rows = P.data.circles.filter(c => (P.filter === 'all' || (P.filter === 'done') === c.done) &&
     (!q || (c.name + ' ' + c.halaqa + ' ' + c.jiha + ' ' + c.region).toLowerCase().indexOf(q) > -1));
   if(!rows.length){ box.innerHTML = '<div class="empty"></div>'; box.firstChild.textContent = t('dpNone'); return; }
+  rows.sort((a, b) => (b.done - a.done) || (Number(a.serial) - Number(b.serial))); // من رفع التوثيق أولاً
   rows.forEach(c => box.appendChild(section(c)));
 }
 
