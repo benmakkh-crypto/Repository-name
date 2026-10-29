@@ -4,6 +4,16 @@ const LK = { phone:'', data:null };
 window.onLangChange = () => { if(LK.data) render(); };
 applyLang();
 
+async function copyMonth(m, btn){
+  const old = btn.textContent; btn.disabled = true; btn.textContent = t('lkWait');
+  try {
+    const r = await api.monthShare(LK.phone, m);
+    try { await navigator.clipboard.writeText(r.url); toast(t('lkMonthCopied', monthBoth(m), r.count)); }
+    catch(e){ prompt(monthBoth(m), r.url); }
+  } catch(e){ toast(err(e), true); }
+  btn.disabled = false; btn.textContent = old;
+}
+
 async function copy(txt){
   try { await navigator.clipboard.writeText(txt); toast(t('lkCopied')); }
   catch(e){ prompt('', txt); }
@@ -33,6 +43,10 @@ function render(){
   LK.phone = g.phone;
   try { LK.data = await api.shareLinks(g.phone, location.href); render(); }
   catch(e){ toast(err(e), true); }
+  try {
+    const ms = await api.shareMonths(g.phone), box = $('#lkMonths');
+    ms.forEach(m => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = '📋 ' + monthBoth(m); b.onclick = () => copyMonth(m, b); box.appendChild(b); });
+  } catch(e){ toast(err(e), true); }
   $('#lkRootCopy').onclick = () => copy(LK.data.root);
   $('#lkSearch').oninput = render;
 })();

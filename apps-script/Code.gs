@@ -947,6 +947,46 @@ function shareLinks(phone, siteUrl) {
   return { root: root.getUrl(), teachers: list };
 }
 
+/** مجلد «حسب الشهر / YYYY-MM» لكل الحلقات: اختصارات إلى مجلد كل معلم لذلك الشهر — رابط واحد للجهة الداعمة */
+function monthShare(phone, month) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month || '')) throw new Error('E_MONTH');
+  const mf = sub_(sub_(rootFolder_(), 'حسب الشهر'), month);
+  const have = {};
+  const it = mf.getFiles(); while (it.hasNext()) have[it.next().getName()] = 1;
+  const tok = ScriptApp.getOAuthToken();
+  let n = 0;
+  teachersInfo_().list.forEach(t => {
+    const home = teacherHome_(t);
+    const q = home.getFoldersByName(month);
+    if (!q.hasNext()) return;
+    const tf = q.next();
+    try { home.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+    const nm = t.serial + ' - ' + t.name.replace(/[\/\\]/g, ' ') + ' - ' + (t.halaqa || '');
+    n++;
+    if (have[nm]) return;
+    UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
+      method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + tok }, muteHttpExceptions: true,
+      payload: JSON.stringify({ name: nm, mimeType: 'application/vnd.google-apps.shortcut', parents: [mf.getId()], shortcutDetails: { targetId: tf.getId() } })
+    });
+  });
+  try { mf.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+  return { month: month, url: mf.getUrl(), count: n };
+}
+
+/** الأشهر المتاحة للمشاركة: أشهر لها تقارير + الشهر الحالي وما بعده بشهرين */
+function shareMonths(phone) {
+  const acc = account_(phone);
+  if (!acc || !acc.media) throw new Error('E_AUTH');
+  const set = {};
+  const v = reportsSheet_().getDataRange().getValues();
+  for (let i = 1; i < v.length; i++) { const m = String(v[i][1]); if (/^\d{4}-\d{2}$/.test(m)) set[m] = 1; }
+  const d = new Date();
+  for (let k = 0; k < 3; k++) { const x = new Date(d.getFullYear(), d.getMonth() + k, 1); set[Utilities.formatDate(x, CONFIG.TZ, 'yyyy-MM')] = 1; }
+  return Object.keys(set).sort();
+}
+
 /* ================= البرامج والأنشطة والجوائز ================= */
 const PROGRAM_HEADERS = ['المعرف', 'النوع', 'العنوان', 'الوصف', 'التاريخ', 'تسلسل المعلم', 'اسم المعلم', 'الحلقة', 'الجائزة', 'الفائزون', 'الحالة', 'أضيف', 'آخر تعديل', 'المصدر'];
 
@@ -1252,7 +1292,7 @@ const API_ = {
   listStudents: listStudents, saveStudent: saveStudent, deleteStudent: deleteStudent,
   listDaily: listDaily, saveDaily: saveDaily, deleteDaily: deleteDaily,
   adminData: adminData, adminStudents: adminStudents, teachersData: teachersData, docsData: docsData,
-  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks,
+  usersList: usersList, userSave: userSave, teacherAdd: teacherAdd, myFile: myFile, teacherFileAdmin: teacherFileAdmin, emailLinks: emailLinks, shareLinks: shareLinks, monthShare: monthShare, shareMonths: shareMonths,
   listPrograms: listPrograms, saveProgram: saveProgram, deleteProgram: deleteProgram, programsAdmin: programsAdmin, programSaveAdmin: programSaveAdmin, programDeleteAdmin: programDeleteAdmin,
   aboutGet: aboutGet, aboutSave: aboutSave, insightsData: insightsData, monthlyReportExcel: monthlyReportExcel, monthlyReportPdf: monthlyReportPdf,
   exportStudents: exportStudents, exportReportsExcel: exportReportsExcel, exportReportPdf: exportReportPdf
