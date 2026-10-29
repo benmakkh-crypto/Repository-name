@@ -67,6 +67,8 @@ spCopy:['نسخ رابط البوابة','Copy portal link','পোর্টা�
 spCopied:['تم نسخ رابط البوابة — أرسله للجهة الداعمة','Portal link copied — send it to the supporter','পোর্টাল লিংক কপি হয়েছে'],
 spCreated:['تم إنشاء الرابط','Link created','লিংক তৈরি হয়েছে'],
 spNone:['لا توجد جهات داعمة بعد — أضف أول جهة بالأسفل.','No supporters yet — add the first below.','এখনও কোনো সহায়ক নেই'],
+rosterDone:['رفعوا التقرير','Submitted','জমা দিয়েছেন'],
+rosterMiss:['لم يرفعوا التقرير','Not submitted','জমা দেননি'],
 lkLast:['الشهر الماضي','last month','গত মাস'],
 lkUploaded:['رُفع توثيق {0} من {1} حلقة','{0} of {1} circles uploaded','{1} টির মধ্যে {0} টি আপলোড'],
 lkDone:['✓ تم رفع التوثيق — {0} صور، {1} فيديو','✓ Documentation uploaded — {0} photos, {1} videos','✓ আপলোড হয়েছে — {0} ছবি, {1} ভিডিও'],

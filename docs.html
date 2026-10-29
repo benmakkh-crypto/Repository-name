@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body data-title="dpTitle">
 <div class="wrap wide">
@@ -46,6 +46,12 @@
           <button id="fVideos" data-i18n="videos"></button>
         </div>
       </div>
+      <div class="card" id="roster">
+        <div class="rgrid">
+          <div class="rcol ok"><h4><span id="rOkN">0</span> <span data-i18n="rosterDone"></span></h4><div id="rOk" class="chips"></div></div>
+          <div class="rcol no"><h4><span id="rNoN">0</span> <span data-i18n="rosterMiss"></span></h4><div id="rNo" class="chips"></div></div>
+        </div>
+      </div>
       <div id="dList"></div>
     </div>
     <div id="lb" class="lb hidden">
@@ -61,8 +67,8 @@
 <div id="toast" class="hidden"></div>
 <script src="js/config.js?v=2"></script>
 <script src="js/i18n.js"></script>
-<script src="js/i18n2.js?v=10"></script>
+<script src="js/i18n2.js?v=11"></script>
 <script src="js/common.js"></script>
-<script src="js/docs.js"></script>
+<script src="js/docs.js?v=2"></script>
 </body>
 </html>

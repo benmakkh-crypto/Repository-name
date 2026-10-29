@@ -295,3 +295,15 @@ textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line
 #installBar .ic{font-size:28px}#installBar div{flex:1;min-width:0}#installBar b{display:block}#installBar small{opacity:.92;line-height:1.4;display:block;font-size:12.5px}
 #installBar .go{background:#fff;color:#0f766e;border:0;border-radius:12px;padding:9px 18px;font:800 15px 'Tajawal','Hind Siliguri',sans-serif;cursor:pointer}
 #installBar .x{background:transparent;color:#fff;border:0;font-size:18px;cursor:pointer;opacity:.8}
+
+/* قائمة من رفع ومن لم يرفع */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.rgrid{grid-template-columns:1fr}}
+.rcol{border-radius:14px;padding:12px 14px}
+.rcol h4{margin:0 0 10px;font-size:15px}
+.rcol.ok{background:#e8f8ef;border:1px solid #86d9a8}.rcol.ok h4{color:#0b7a4f}
+.rcol.no{background:#fdecec;border:1px solid #f1a3a3}.rcol.no h4{color:#b42318}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-block;padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#fff}
+.rcol.ok .chip{background:linear-gradient(135deg,#13b86a,#0b8f52)}
+.rcol.no .chip{background:linear-gradient(135deg,#ef4444,#c62828)}

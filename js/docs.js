@@ -9,6 +9,8 @@ applyLang();
 function renderHead(){
   const d = D.data;
   fillYM($('#dYear'), $('#dMonth'), d.month, d.years);
+  const fill = (id, list) => { const b = $(id); b.innerHTML = ''; list.forEach(x => { const a = document.createElement('a'); a.className = 'chip'; a.textContent = x.name; a.title = x.halaqa || ''; a.href = '#t' + x.serial; b.appendChild(a); }); };
+  fill('#rOk', d.done || []); fill('#rNo', d.missing || []); $('#rOkN').textContent = (d.done || []).length; $('#rNoN').textContent = (d.missing || []).length;
   $('#tReports').textContent = d.totals.reports; $('#tPhotos').textContent = d.totals.photos; $('#tVideos').textContent = d.totals.videos;
 }
 

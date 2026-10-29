@@ -799,7 +799,10 @@ function docsData(phone, month) {
       date: String(r[2]), dateH: String(r[20] || ''), submittedAt: String(r[0]), notes: String(r[17] || ''), photos: ph, videos: vi });
   }
   rows.sort((a, b) => Number(a.serial) - Number(b.serial));
-  return { account: { role: acc.role, name: acc.name }, month: mp.month, years: mp.years, rows: rows, totals: { reports: rows.length, photos: photos, videos: videos } };
+  const have = {}; rows.forEach(r => have[r.serial] = 1);
+  const missing = teachersInfo_().list.filter(t => !have[String(t.serial)]).map(t => ({ serial: String(t.serial), name: t.name, halaqa: t.halaqa }));
+  const doneList = rows.map(r => ({ serial: r.serial, name: r.name, halaqa: r.halaqa }));
+  return { account: { role: acc.role, name: acc.name }, month: mp.month, years: mp.years, rows: rows, done: doneList, missing: missing, totals: { reports: rows.length, photos: photos, videos: videos } };
 }
 
 /* ================= الإدارة: المستخدمون والمعلمون (المشرف العام فقط) ================= */
