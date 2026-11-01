@@ -321,3 +321,12 @@ textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line
 .sc-add summary,.sc-drive summary{cursor:pointer;font-weight:700}
 .sc-add summary{color:#e9f6f1}.sc-add input{background:#fff}
 .sc-drive>summary{font-size:16px}.sc-drive[open]>summary{margin-bottom:14px}
+
+/* شريط التنقل: سطر واحد بلا تمرير ولا تداخل — أيقونة فوق النص */
+.topnav{overflow:visible;gap:4px;padding:6px;align-items:stretch}
+.topnav a{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 3px;font-size:13px;line-height:1.3;white-space:normal;word-break:normal;overflow-wrap:break-word;hyphens:none}
+.topnav a::before{margin:0;font-size:20px;line-height:1.1}
+.topnav a[href^="links"]::before{content:"🔗"}
+.topnav .out{flex:0 0 auto;margin:0;align-self:center;padding:8px 12px;font-size:12.5px}
+@media(max-width:520px){.topnav{gap:2px;padding:4px}.topnav a{font-size:10.5px;padding:6px 1px}.topnav a::before{font-size:17px}.topnav .out{padding:6px 7px;font-size:11px}}
+@media(max-width:430px){.topnav a{font-size:9.5px}.topnav a::before{font-size:16px}}
