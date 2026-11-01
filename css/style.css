@@ -415,3 +415,4 @@ body.has-dock{padding-bottom:104px}
 .topnav.dock .dock-more a{flex-direction:row;justify-content:flex-start;gap:10px;padding:6px 10px;font-size:14px!important;border-radius:14px}
 .topnav.dock .dock-more a i{width:34px;height:34px}
 .topnav.dock .dock-more a.on i{transform:none;box-shadow:none}.topnav.dock .dock-more a.on span{transform:none}
+body.has-dock #installBar{bottom:108px;z-index:60}
