@@ -45,8 +45,8 @@ function link(text, href, ext){ const a = document.createElement('a'); a.textCon
 
 function card(r){
   const acc = A.data.account;
-  const d = document.createElement('details'); d.className = 'item'; d.id = 't' + r.serial;
-  const sm = document.createElement('summary');
+  const d = document.createElement('details'); d.className = 'item'; d.id = 't' + r.serial; d.dataset.n = r.serial;
+  const sm = document.createElement('summary'); sm.dataset.n = r.serial;
   const ti = document.createElement('div'); ti.innerHTML = '<b></b><small></small>';
   ti.firstChild.textContent = r.name;
   ti.lastChild.textContent = [r.halaqa && t('halaqa', r.halaqa), r.jiha].filter(Boolean).join(' — ');

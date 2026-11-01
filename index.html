@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body data-title="title">
 <div class="wrap">
@@ -25,12 +25,18 @@
   <main>
     <!-- Login -->
     <div id="setup" class="note info notice hidden" data-i18n="setupNeeded"></div>
-    <section id="v-login" class="card">
+    <section id="v-login" class="card gate">
+      <div class="gate-ic">🕌</div>
       <h2 data-i18n="loginTitle"></h2>
       <p class="sub" data-i18n="loginSub"></p>
       <label class="f" for="phone" data-i18n="phoneLbl"></label>
-      <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX">
+      <div class="gate-field"><span>📱</span><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX" dir="ltr"></div>
       <button id="btnLogin" class="btn" data-i18n="loginBtn"></button>
+      <ul class="gate-feat">
+        <li><b>📸</b><span data-i18n="gtF1"></span></li>
+        <li><b>📖</b><span data-i18n="gtF2"></span></li>
+        <li><b>👥</b><span data-i18n="gtF3"></span></li>
+      </ul>
     </section>
 
     <!-- Choose teacher (shared number) -->
@@ -175,7 +181,7 @@
 <div id="toast" class="hidden"></div>
 <script src="js/config.js?v=2"></script>
 <script src="js/i18n.js"></script>
-<script src="js/i18n2.js?v=13"></script>
+<script src="js/i18n2.js?v=14"></script>
 <script src="js/common.js"></script>
 <script src="js/teacher.js?v=4"></script>
 </body>

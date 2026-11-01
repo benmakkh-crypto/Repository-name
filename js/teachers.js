@@ -34,8 +34,8 @@ function renderList(){
 function pill(text){ const s = document.createElement('span'); s.className = 'pill'; s.textContent = text; return s; }
 
 function card(r){
-  const d = document.createElement('details'); d.className = 'item'; d.id = 't' + r.serial;
-  const sm = document.createElement('summary');
+  const d = document.createElement('details'); d.className = 'item'; d.id = 't' + r.serial; d.dataset.n = r.serial;
+  const sm = document.createElement('summary'); sm.dataset.n = r.serial;
   const ti = document.createElement('div'); ti.innerHTML = '<b></b><small></small>';
   ti.firstChild.textContent = r.name;
   ti.lastChild.textContent = [r.halaqa && t('halaqa', r.halaqa), r.jiha, r.region].filter(Boolean).join(' — ');
