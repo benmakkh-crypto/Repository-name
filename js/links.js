@@ -49,18 +49,32 @@ function render(){
   });
 }
 
-/* بوابة الداعم: رابط دائم لكل جهة داعمة (حساب بصلاحية «جهة داعمة») */
+/* بوابة الداعم: رابط دائم جاهز لكل جهة، مع نسخ وواتساب ومعاينة */
 const portalLink = u => location.href.replace(/[^\/]*$/, '') + 'report.html?k=' + u.key;
+const waUrl = l => 'https://wa.me/?text=' + encodeURIComponent(t('spWa') + '\n' + l);
+
 async function loadSupporters(g){
   const box = $('#spList'); box.innerHTML = '';
-  if(!g.acc.manage){ $('#spAdd').parentNode.classList.add('hidden'); return; }
-  let us = []; try { us = (await api.usersList(g.phone)).filter(u => u.role === 'donor' && u.active); } catch(e){ toast(err(e), true); }
-  if(!us.length){ const p = document.createElement('p'); p.className = 'sub'; p.textContent = t('spNone'); box.appendChild(p); }
+  if(!g.acc.manage){ $('#spAdd').closest('details').classList.add('hidden'); }
+  let us = [];
+  try {
+    us = (await api.usersList(g.phone)).filter(u => u.role === 'donor' && u.active);
+    if(!us.length && g.acc.manage){ // أنشئ رابطاً افتراضياً تلقائياً ليكون جاهزاً دون خطوات
+      await api.userSave(g.phone, { phone: '9' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0'), name: t('spDefault'), role: 'donor' });
+      us = (await api.usersList(g.phone)).filter(u => u.role === 'donor' && u.active);
+    }
+  } catch(e){ toast(err(e), true); }
+  if(!us.length){ const p = document.createElement('p'); p.textContent = t('spNone'); box.appendChild(p); return; }
   us.forEach(u => {
-    const row = document.createElement('div'); row.className = 'fbar'; row.style.marginBottom = '8px';
-    const n = document.createElement('b'); n.textContent = u.name; n.style.flex = '1'; row.appendChild(n);
-    const b = document.createElement('button'); b.className = 'btn'; b.textContent = '🔗 ' + t('spCopy'); b.onclick = () => copyText(portalLink(u), t('spCopied')); row.appendChild(b);
-    box.appendChild(row);
+    const link = portalLink(u), c = document.createElement('div'); c.className = 'sc-row';
+    c.innerHTML = '<b></b><div class="sc-url" dir="ltr"></div><div class="sc-act"></div>';
+    c.querySelector('b').textContent = u.name; c.querySelector('.sc-url').textContent = link;
+    const act = c.querySelector('.sc-act');
+    const mk = (cls, label, fn) => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; act.appendChild(b); };
+    mk('sc-b main', '📋 ' + t('spCopy'), () => copyText(link, t('spCopied')));
+    mk('sc-b wa', '🟢 ' + t('spWhats'), () => window.open(waUrl(link), '_blank', 'noopener'));
+    mk('sc-b', '👁 ' + t('spPreview'), () => window.open(link, '_blank', 'noopener'));
+    box.appendChild(c);
   });
 }
 

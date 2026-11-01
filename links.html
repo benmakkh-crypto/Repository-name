@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body data-title="tpTitle">
 <div class="wrap wide">
@@ -29,12 +29,17 @@
         <h2 class="ptitle" data-i18n="lkTitle"></h2>
         <p class="sub" style="margin:0" data-i18n="lkSub"></p>
       </div>
-      <div class="card" style="border:2px solid #0d5c4b">
-        <h3 data-i18n="spTitle"></h3>
-        <p class="sub" data-i18n="spSub"></p>
+      <section class="sc-hero">
+        <div class="sc-ic">🔗</div>
+        <h3 data-i18n="spTitle2"></h3>
+        <p data-i18n="spSub2"></p>
         <div id="spList"></div>
-        <div class="fbar" style="margin-top:12px"><input id="spName" type="text" data-ph="spNamePh"><button id="spAdd" class="btn" data-i18n="spAdd"></button></div>
-      </div>
+        <details class="sc-add"><summary data-i18n="spMore"></summary>
+          <div class="fbar" style="margin-top:10px"><input id="spName" type="text" data-ph="spNamePh"><button id="spAdd" class="btn" data-i18n="spAdd"></button></div>
+        </details>
+      </section>
+      <details class="card sc-drive">
+        <summary data-i18n="lkDriveTitle"></summary>
       <div class="card">
         <h3 data-i18n="lkMonths"></h3>
         <p class="sub" data-i18n="lkMonthsSub"></p>
@@ -48,6 +53,7 @@
         </div>
       </div>
       <div id="lkList"></div>
+      </details>
     </div>
   </main>
   <footer class="ft" data-i18n="brandCo"></footer>
@@ -55,7 +61,7 @@
 <div id="toast" class="hidden"></div>
 <script src="js/config.js?v=2"></script>
 <script src="js/i18n.js"></script>
-<script src="js/i18n2.js?v=11"></script>
+<script src="js/i18n2.js?v=13"></script>
 <script src="js/common.js"></script>
 <script src="js/links.js"></script>
 </body>
