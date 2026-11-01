@@ -109,9 +109,27 @@ function renderNav(active, acc){
   if(acc.media) items.push(['links.html', 'navLinks', 'links']);
   if(acc.manage) items.push(['manage.html', 'navManage', 'manage']);
   items.push(['about.html', 'navAbout', 'about']);
-  const nav = $('#topnav'); nav.innerHTML = '';
-  items.forEach(i => { const a = document.createElement('a'); a.href = i[0]; a.dataset.i18n = i[1]; if(i[2] === active){ a.className = 'on'; a.setAttribute('aria-current', 'page'); } nav.appendChild(a); });
-  const o = document.createElement('button'); o.className = 'out'; o.dataset.i18n = 'logout'; o.onclick = logout; nav.appendChild(o);
+  const IC = {
+    dash:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    docs:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 9"/>',
+    insights:'<path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/>',
+    teachers:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3.2-6 6.5-6s6 2 6.5 6"/><path d="M16 5a3.5 3.5 0 010 6.5M18 14c2 .6 3.3 2.5 3.5 6"/>',
+    programs:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3"/>',
+    links:'<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3A4 4 0 0011 18.7l1-1"/>',
+    manage:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    about:'<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13M9 8h6"/>',
+    out:'<path d="M9 4H5a2 2 0 00-2 2v12a2 2 0 002 2h4M16 8l4 4-4 4M20 12H9"/>'
+  };
+  const svg = k => '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + IC[k] + '</svg>';
+  const nav = $('#topnav'); nav.innerHTML = ''; nav.classList.add('dock');
+  items.forEach(i => {
+    const a = document.createElement('a'); a.href = i[0];
+    a.innerHTML = '<i>' + svg(i[2]) + '</i><span data-i18n="' + (i[2] === 'teachers' ? 'navTeachersS' : i[1]) + '"></span>';
+    if(i[2] === active){ a.className = 'on'; a.setAttribute('aria-current', 'page'); }
+    nav.appendChild(a);
+  });
+  const o = document.createElement('button'); o.className = 'out'; o.setAttribute('aria-label', 'logout'); o.innerHTML = '<i>' + svg('out') + '</i><span data-i18n="logout"></span>'; o.onclick = logout; nav.appendChild(o);
+  document.body.classList.add('has-dock');
   applyLang();
 }
 

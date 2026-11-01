@@ -380,3 +380,21 @@ body{background:radial-gradient(1200px 500px at 50% -120px,#d6efe5 0,transparent
 .gate{transform:perspective(1000px) rotateX(2deg)}
 .gate-ic{box-shadow:0 -5px 0 rgba(0,0,0,.08) inset,0 14px 20px -8px rgba(13,92,75,.45)!important;transform:translateZ(30px)}
 .gate-feat b{box-shadow:0 -3px 0 rgba(0,0,0,.08) inset,0 8px 12px -6px rgba(8,53,44,.35)}
+
+/* ===== شريط التنقل العائم (Dock) ===== */
+body.has-dock{padding-bottom:104px}
+.topnav.dock{position:fixed!important;z-index:50;left:50%;bottom:14px;transform:translateX(-50%);width:min(760px,calc(100% - 20px));margin:0!important;padding:8px!important;gap:2px!important;border-radius:26px!important;overflow:visible!important;
+  background:linear-gradient(180deg,rgba(18,58,50,.94),rgba(8,36,31,.97))!important;backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 -4px 0 rgba(0,0,0,.25) inset,0 24px 40px -10px rgba(0,0,0,.55),0 8px 14px -6px rgba(0,0,0,.4)!important}
+.topnav.dock a,.topnav.dock .out{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 2px 6px;border-radius:18px;color:#a9cfc3!important;background:transparent!important;border:0!important;box-shadow:none!important;font:600 10.5px/1.2 'Tajawal','Hind Siliguri',sans-serif!important;white-space:nowrap;cursor:pointer;transition:transform .2s,color .2s}
+.topnav.dock a::before{content:none!important}
+.topnav.dock i{display:flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:14px;transition:.2s}
+.topnav.dock span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.topnav.dock a:hover,.topnav.dock .out:hover{color:#fff!important;transform:translateY(-3px)}
+.topnav.dock a.on{color:#fff!important}
+.topnav.dock a.on i{background:linear-gradient(135deg,#2fd197,#0e9f8b);transform:translateY(-12px) scale(1.12);box-shadow:0 -3px 0 rgba(0,0,0,.2) inset,0 14px 20px -4px rgba(23,166,115,.75),0 0 0 4px rgba(8,36,31,.95)}
+.topnav.dock a.on span{transform:translateY(-8px);color:#ffe9a8}
+.topnav.dock .out{flex:0 0 auto;width:54px;color:#ff9c9c!important}
+.topnav.dock .out span{display:none}
+.topnav.dock .out i{background:rgba(255,120,120,.12)}
+@media(max-width:430px){.topnav.dock a,.topnav.dock .out{font-size:9.5px!important}.topnav.dock i{width:34px;height:34px}.topnav.dock .out{width:42px}}
