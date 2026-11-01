@@ -6,7 +6,6 @@ applyLang();
 
 function renderHead(){
   const d = A.data;
-  $('#aName').textContent = t('role_' + d.account.role);
   fillYM($('#aYear'), $('#aMonth'), d.month, d.years);
 }
 
@@ -102,6 +101,7 @@ $('#exRep').onclick = () => doExport($('#exRep'), () => api.exportReportsExcel(A
   const g = await adminGuard('dash', 'stats');
   if(!g) return;
   A.phone = g.phone; A.acc = g.acc;
-  await loadAdmin('');
+  const n = new Date(); n.setDate(1); n.setMonth(n.getMonth() - 1);
+  await loadAdmin(n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2));
   if(location.hash){ const el = document.querySelector(location.hash); if(el){ el.open = true; el.scrollIntoView(); } }
 })();

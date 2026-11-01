@@ -6,6 +6,7 @@ role_donor:['الجهة الداعمة','Supporting organization','সহায�
 navPrograms:['البرامج والأنشطة','Programs & activities','কর্মসূচি ও কার্যক্রম'],
 navManage:['إدارة النظام','Management','ব্যবস্থাপনা'],
 navTeachersS:['المعلمون','Teachers','শিক্ষক'],
+navMore:['المزيد','More','আরও'],
 navAbout:['عن الحلقات','About the circles','হালাকা সম্পর্কে'],
 aboutLink:['تعرّف على حلقات القرآن الكريم','Learn about the Quran circles','কুরআন হালাকা সম্পর্কে জানুন'],
 myFile:['ملف حلقتي (الصور والمقاطع)','My circle file (photos & videos)','আমার হালাকার ফাইল (ছবি ও ভিডিও)'],

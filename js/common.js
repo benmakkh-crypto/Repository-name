@@ -122,12 +122,24 @@ function renderNav(active, acc){
   };
   const svg = k => '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + IC[k] + '</svg>';
   const nav = $('#topnav'); nav.innerHTML = ''; nav.classList.add('dock');
-  items.forEach(i => {
+  const MAIN = ['dash','docs','teachers','links'];
+  const mk = (i, parent) => {
     const a = document.createElement('a'); a.href = i[0];
     a.innerHTML = '<i>' + svg(i[2]) + '</i><span data-i18n="' + (i[2] === 'teachers' ? 'navTeachersS' : i[1]) + '"></span>';
     if(i[2] === active){ a.className = 'on'; a.setAttribute('aria-current', 'page'); }
-    nav.appendChild(a);
-  });
+    parent.appendChild(a); return a;
+  };
+  const rest = items.filter(i => !MAIN.includes(i[2]));
+  items.filter(i => MAIN.includes(i[2])).forEach(i => mk(i, nav));
+  if(rest.length){
+    const sheet = document.createElement('div'); sheet.className = 'dock-more hidden';
+    rest.forEach(i => mk(i, sheet));
+    const mb = document.createElement('button'); mb.className = 'more' + (rest.some(i => i[2] === active) ? ' on' : '');
+    mb.innerHTML = '<i><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></i><span data-i18n="navMore"></span>';
+    mb.onclick = e => { e.stopPropagation(); sheet.classList.toggle('hidden'); };
+    document.addEventListener('click', () => sheet.classList.add('hidden'));
+    nav.appendChild(mb); nav.appendChild(sheet);
+  }
   const o = document.createElement('button'); o.className = 'out'; o.setAttribute('aria-label', 'logout'); o.innerHTML = '<i>' + svg('out') + '</i><span data-i18n="logout"></span>'; o.onclick = logout; nav.appendChild(o);
   document.body.classList.add('has-dock');
   applyLang();

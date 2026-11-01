@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Hind+Siliguri:wght@400;500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
 </head>
 <body data-title="navDash">
 <div class="wrap wide">
@@ -25,18 +25,15 @@
   <main>
     <nav id="topnav" class="topnav"></nav>
     <div id="content">
-      <div class="card me"><div><h2 id="aName"></h2></div></div>
-      <div class="card">
+      <div class="card dfilter">
         <div class="fbar">
           <div><label class="f" for="aYear" data-i18n="year"></label><select id="aYear"></select></div>
           <div><label class="f" for="aMonth" data-i18n="month"></label><select id="aMonth"></select></div>
-          <div><label class="f" for="aSearch" data-i18n="search"></label><input id="aSearch" type="text" data-ph="searchPh"></div>
+          <div class="grow"><label class="f" for="aSearch" data-i18n="search"></label><input id="aSearch" type="text" data-ph="searchPh"></div>
         </div>
-      </div>
-      <div id="aExport" class="card hidden">
-        <h2 data-i18n="exportTitle"></h2>
-        <button id="exAll" class="btn ghost" data-i18n="exAll"></button>
-        <button id="exRep" class="btn ghost" data-i18n="exRep"></button>
+        <details id="aExport" class="hidden dexp"><summary data-i18n="exportTitle"></summary>
+          <div class="dexp-b"><button id="exAll" class="btn ghost" data-i18n="exAll"></button><button id="exRep" class="btn ghost" data-i18n="exRep"></button></div>
+        </details>
       </div>
       <div id="aStats" class="hidden">
         <div class="stats">
@@ -59,7 +56,7 @@
 <div id="toast" class="hidden"></div>
 <script src="js/config.js?v=2"></script>
 <script src="js/i18n.js"></script>
-<script src="js/i18n2.js?v=15"></script>
+<script src="js/i18n2.js?v=16"></script>
 <script src="js/common.js"></script>
 <script src="js/admin.js"></script>
 </body>
