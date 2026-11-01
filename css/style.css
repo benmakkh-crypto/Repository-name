@@ -363,3 +363,20 @@ textarea{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--line
 .gate-feat{list-style:none;margin:22px 0 0;padding:16px 0 0;border-top:1px dashed var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gate-feat li{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;color:var(--muted);font-weight:600}
 .gate-feat b{width:40px;height:40px;border-radius:13px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px}
+
+/* ===== طبقة ثلاثية الأبعاد ===== */
+body{background:radial-gradient(1200px 500px at 50% -120px,#d6efe5 0,transparent 70%),#e9f0ee}
+.card,.gate{transform-style:preserve-3d;box-shadow:0 1px 0 #fff inset,0 2px 4px rgba(8,53,44,.06),0 12px 24px -8px rgba(8,53,44,.18),0 30px 50px -20px rgba(8,53,44,.22)!important;border:1px solid rgba(255,255,255,.7)!important}
+.stats{perspective:900px}
+.stat{transform:rotateX(6deg) translateZ(0);transform-origin:50% 100%;border-radius:20px!important;box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 -6px 0 rgba(0,0,0,.14) inset,0 18px 26px -10px rgba(8,53,44,.45)!important;transition:transform .25s,box-shadow .25s}
+.stat:hover{transform:rotateX(0) translateY(-6px)}
+.stat b{text-shadow:0 3px 0 rgba(0,0,0,.18);font-size:38px}
+.btn{box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 -4px 0 rgba(0,0,0,.18) inset,0 12px 20px -8px rgba(13,92,75,.55)!important;transition:transform .12s,box-shadow .12s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 -1px 0 rgba(0,0,0,.18) inset,0 4px 8px -4px rgba(13,92,75,.5)!important}
+.topnav{box-shadow:0 1px 0 #fff inset,0 -3px 0 rgba(8,53,44,.08) inset,0 16px 28px -12px rgba(8,53,44,.35)!important;border-radius:22px!important}
+.topnav a.on,.topnav a.active,.topnav .on{box-shadow:0 -3px 0 rgba(0,0,0,.18) inset,0 10px 16px -6px rgba(13,92,75,.6)!important}
+.item{transition:transform .25s,box-shadow .25s;box-shadow:0 1px 0 #fff inset,0 -4px 0 rgba(8,53,44,.06) inset,0 14px 24px -12px rgba(8,53,44,.35)!important}
+.item:hover{transform:translateY(-4px) rotateX(2deg)}
+.gate{transform:perspective(1000px) rotateX(2deg)}
+.gate-ic{box-shadow:0 -5px 0 rgba(0,0,0,.08) inset,0 14px 20px -8px rgba(13,92,75,.45)!important;transform:translateZ(30px)}
+.gate-feat b{box-shadow:0 -3px 0 rgba(0,0,0,.08) inset,0 8px 12px -6px rgba(8,53,44,.35)}
